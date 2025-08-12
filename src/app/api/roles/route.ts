@@ -13,6 +13,8 @@ export async function GET() {
             Permission: {
               select: {
                 id: true,
+                name: true,
+                description: true,
                 resource: true,
                 action: true,
                 code: true,
@@ -45,6 +47,8 @@ export async function GET() {
       name: role.name,
       permissions: role.RolePermissions.map((rp) => ({
         id: rp.Permission.id,
+        name: rp.Permission.name,
+        description: rp.Permission.description,
         resource: rp.Permission.resource,
         action: rp.Permission.action,
         code: rp.Permission.code,

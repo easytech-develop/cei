@@ -7,6 +7,8 @@ export async function GET() {
       orderBy: [{ resource: "asc" }, { action: "asc" }],
       select: {
         id: true,
+        name: true,
+        description: true,
         resource: true,
         action: true,
         code: true,
