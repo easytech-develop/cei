@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  BanknoteArrowDown,
   BarChart3,
   Bell,
   Calendar,
@@ -9,6 +10,7 @@ import {
   Database,
   FileText,
   HelpCircle,
+  List,
   Moon,
   Plus,
   Send,
@@ -19,6 +21,7 @@ import {
   Upload,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -137,6 +140,25 @@ const sidebarItems: SidebarItem[] = [
     href: "/mobile",
   },
   {
+    id: "expenses",
+    icon: BanknoteArrowDown,
+    label: "Despesas",
+    subItems: [
+      {
+        id: "expenses-list",
+        icon: List,
+        label: "Listar Despesas",
+        href: "/expenses",
+      },
+      {
+        id: "expenses-add",
+        icon: Plus,
+        label: "Adicionar Despesa",
+        href: "/expenses/add",
+      },
+    ],
+  },
+  {
     id: "database",
     icon: Database,
     label: "Banco de Dados",
@@ -202,10 +224,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     }
   };
 
-  const handleSubItemClick = (href: string) => {
-    window.location.href = href;
-  };
-
   // Renderiza um placeholder até o componente estar montado
   if (!mounted) {
     return (
@@ -264,7 +282,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                   key={item.id}
                   item={item}
                   onClick={() => handleItemClick(item)}
-                  onSubItemClick={handleSubItemClick}
                 />
               ))}
             </div>
@@ -278,9 +295,12 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                     size="icon"
                     className={cn(
                       "w-10 h-10 rounded-full transition-all duration-200",
-                      theme === "dark" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                      theme === "dark" &&
+                      "bg-sidebar-accent text-sidebar-accent-foreground",
                     )}
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    onClick={() =>
+                      setTheme(theme === "dark" ? "light" : "dark")
+                    }
                   >
                     <Moon className="h-4 w-4" />
                   </Button>
@@ -295,9 +315,12 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                     size="icon"
                     className={cn(
                       "w-10 h-10 rounded-full transition-all duration-200",
-                      theme === "light" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                      theme === "light" &&
+                      "bg-sidebar-accent text-sidebar-accent-foreground",
                     )}
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    onClick={() =>
+                      setTheme(theme === "dark" ? "light" : "dark")
+                    }
                   >
                     <Sun className="h-4 w-4" />
                   </Button>
@@ -315,10 +338,9 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 interface SidebarItemProps {
   item: SidebarItem;
   onClick: () => void;
-  onSubItemClick: (href: string) => void;
 }
 
-function SidebarItem({ item, onClick, onSubItemClick }: SidebarItemProps) {
+function SidebarItem({ item, onClick }: SidebarItemProps) {
   const Icon = item.icon;
   const [isOpen, setIsOpen] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -371,10 +393,12 @@ function SidebarItem({ item, onClick, onSubItemClick }: SidebarItemProps) {
                     key={subItem.id}
                     variant="ghost"
                     className="w-full justify-start h-8 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    onClick={() => onSubItemClick(subItem.href)}
+                    asChild
                   >
-                    <SubIcon className="h-4 w-4 mr-2" />
-                    {subItem.label}
+                    <Link href={subItem.href}>
+                      <SubIcon className="h-4 w-4 mr-2" />
+                      {subItem.label}
+                    </Link>
                   </Button>
                 );
               })}
@@ -393,11 +417,14 @@ function SidebarItem({ item, onClick, onSubItemClick }: SidebarItemProps) {
           size="icon"
           className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 relative"
           onClick={onClick}
+          asChild
         >
-          <Icon className="h-4 w-4 text-sidebar-foreground" />
-          {item.hasNotification && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full border-2 border-sidebar" />
-          )}
+          <Link href={item.href ?? ""}>
+            <Icon className="h-4 w-4 text-sidebar-foreground" />
+            {item.hasNotification && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full border-2 border-sidebar" />
+            )}
+          </Link>
         </Button>
       </TooltipTrigger>
       <TooltipContent side="right">{item.label}</TooltipContent>
