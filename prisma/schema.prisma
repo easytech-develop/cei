@@ -43,24 +43,25 @@ enum UserStatus {
 // ----------- USUÁRIOS & AUTENTICAÇÃO -----------
 
 model User {
-  id           String     @id @default(cuid())
+  id           String     @id @default(uuid(7))
   name         String
   email        String     @unique
-  passwordHash String // se usar Credentials + bcrypt
+  passwordHash String
   status       UserStatus @default(ACTIVE)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   Roles           UserRole[]
-  // exceções/adições pontuais
   UserPermissions UserPermission[]
+  AuditLogs       AuditLog[]
 
-  // util p/ auditoria
-  AuditLogs AuditLog[]
+  // NextAuth fields
+  emailVerified DateTime?
+  image         String?
 }
 
 model Role {
-  id   String @id @default(cuid())
+  id   String @id @default(uuid(7))
   slug String @unique // "OWNER", "DIRECTOR", "SECRETARY", "TEACHER"
   name String
 
@@ -69,7 +70,7 @@ model Role {
 }
 
 model Permission {
-  id             String           @id @default(cuid())
+  id             String           @id @default(uuid(7))
   resource       String // "expense", "vendor", "student", "classroom" ...
   action         String // "read","create","update","delete","approve","pay"...
   // dica: padronize como "expense:create" no app
@@ -114,7 +115,7 @@ model UserPermission {
 // ----------- AUDITORIA -----------
 
 model AuditLog {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid(7))
   entity    String
   entityId  String
   action    String
@@ -132,7 +133,7 @@ model AuditLog {
 // ----------- ESTRUTURA DE DADOS -----------
 
 model Vendor {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid(7))
   name      String
   document  String? // CPF/CNPJ
   email     String?
@@ -147,7 +148,7 @@ model Vendor {
 }
 
 model ExpenseCategory {
-  id       String            @id @default(cuid())
+  id       String            @id @default(uuid(7))
   code     String // ex: 3.1 Alimentação
   name     String
   parentId String?
@@ -160,7 +161,7 @@ model ExpenseCategory {
 }
 
 model Account {
-  id             String   @id @default(cuid())
+  id             String   @id @default(uuid(7))
   name           String // Caixa, Banco XYZ
   type           String // CASH, BANK
   openingBalance Decimal  @default(0) @db.Decimal(14, 2)
@@ -172,7 +173,7 @@ model Account {
 }
 
 model Expense {
-  id             String        @id @default(cuid())
+  id             String        @id @default(uuid(7))
   vendorId       String
   categoryId     String
   description    String
@@ -195,7 +196,7 @@ model Expense {
 }
 
 model ExpenseItem {
-  id        String  @id @default(cuid())
+  id        String  @id @default(uuid(7))
   expenseId String
   name      String
   quantity  Decimal @default(1) @db.Decimal(14, 4)
@@ -207,7 +208,7 @@ model ExpenseItem {
 }
 
 model ExpenseInstallment {
-  id        String        @id @default(cuid())
+  id        String        @id @default(uuid(7))
   expenseId String
   number    Int
   dueDate   DateTime
@@ -222,7 +223,7 @@ model ExpenseInstallment {
 }
 
 model ExpensePayment {
-  id            String            @id @default(cuid())
+  id            String            @id @default(uuid(7))
   installmentId String
   paidAt        DateTime
   amount        Decimal           @db.Decimal(14, 2)
@@ -237,7 +238,7 @@ model ExpensePayment {
 }
 
 model ExpenseAttachment {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid(7))
   expenseId  String
   fileKey    String
   fileName   String
