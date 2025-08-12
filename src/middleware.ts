@@ -1,24 +1,21 @@
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth(
-  function middleware(req) {
-    // Middleware simples - apenas protege rotas
+  function middleware() {
     return;
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Permitir acesso a páginas públicas
-        const publicPaths = ["/auth/signin", "/auth/error"];
-        const isPublicPath = publicPaths.some(path =>
-          req.nextUrl.pathname.startsWith(path)
+        const publicPaths = ["/auth/sign-in"];
+        const isPublicPath = publicPaths.some((path) =>
+          req.nextUrl.pathname.startsWith(path),
         );
 
         if (isPublicPath) {
           return true;
         }
 
-        // Para outras rotas, verificar se está autenticado
         return !!token;
       },
     },
