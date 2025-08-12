@@ -1,54 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { DataTable } from "@/components/data-table";
 import { can } from "@/lib/auth/permissions";
-import { prisma } from "@/server/prisma";
-import { columns } from "./_components/columns";
+import ListUsers from "./_components/list-users";
 
 export const metadata: Metadata = {
 	title: "Usuários",
 	description: "Gerencie seus usuários e suas permissões.",
 };
 
-export default async function UsersPage({
-	searchParams,
-}: {
-	searchParams: Promise<{
-		page?: string;
-		limit?: string;
-	}>;
-}) {
-	const { page = 1, limit = 10 } = await searchParams;
-
+export default async function UsersPage() {
 	if (!(await can("user:read"))) {
 		redirect("/dashboard?error=no_permission");
 	}
-
-	const users = (await prisma.user.findMany({
-		skip: (Number(page) - 1) * Number(limit),
-		take: Number(limit),
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			Roles: {
-				select: {
-					Role: {
-						select: {
-							id: true,
-							slug: true,
-							name: true,
-						},
-					},
-				},
-			},
-		},
-	})).map((user) => ({
-		id: user.id,
-		name: user.name,
-		email: user.email,
-		roles: user.Roles.map((role) => role.Role),
-	}));
 
 	return (
 		<div className="space-y-6">
@@ -58,9 +21,8 @@ export default async function UsersPage({
 					Gerencie seus usuários e suas permissões.
 				</p>
 			</div>
-
 			<div className="grid gap-4">
-				<DataTable columns={columns} data={users} />
+				<ListUsers />
 			</div>
 		</div>
 	);
