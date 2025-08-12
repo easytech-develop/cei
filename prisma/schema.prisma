@@ -114,15 +114,19 @@ model UserPermission {
 // ----------- AUDITORIA -----------
 
 model AuditLog {
-  id       String   @id @default(cuid()) // ID único do log
-  entity   String // Nome da tabela/modelo alterado, ex: "Expense"
-  entityId String // ID do registro alterado
-  action   String // Tipo de ação: CREATED, UPDATED, DELETED, APPROVED...
-  actorId  String? // ID do usuário que fez a ação
-  at       DateTime @default(now()) // Data/hora da ação
-  diff     Json? // Diferença antes/depois (opcional)
+  id        String   @id @default(cuid())
+  entity    String
+  entityId  String
+  action    String
+  actorId   String?
+  at        DateTime @default(now())
+  diff      Json?
+  ip        String?
+  userAgent String?
 
-  Actor User? @relation(fields: [actorId], references: [id]) // Quem fez
+  Actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([entity, entityId, at])
 }
 
 // ----------- ESTRUTURA DE DADOS -----------
