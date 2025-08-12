@@ -3,7 +3,7 @@ import { prisma } from "@/server/prisma";
 
 export async function GET() {
   try {
-    // Buscar todas as permissões
+
     const permissions = await prisma.permission.findMany({
       orderBy: [{ resource: "asc" }, { action: "asc" }],
       select: {

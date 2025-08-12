@@ -6,6 +6,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import {
 	Pagination,
 	PaginationContent,
@@ -35,7 +36,6 @@ interface DataTableProps<TData, TValue> {
 		total?: number;
 		totalPages?: number;
 	};
-	setMeta?: (meta: { page: number; limit: number }) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,16 +43,15 @@ export function DataTable<TData, TValue>({
 	data,
 	loading = false,
 	meta,
-	setMeta,
 }: DataTableProps<TData, TValue>) {
+	const router = useRouter();
 	const table = useReactTable({
 		data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 	});
 
-	// Função para gerar os números das páginas
-	const generatePageNumbers = () => {
+	function generatePageNumbers() {
 		if (!meta?.totalPages) return [];
 
 		const currentPage = meta.page;
@@ -91,9 +90,13 @@ export function DataTable<TData, TValue>({
 		}
 
 		return pages;
-	};
+	}
 
-	if (!meta || !setMeta || !meta.totalPages || meta.totalPages <= 1) {
+	function handlePageChange(page: number) {
+		router.push(`?page=${page}`);
+	}
+
+	if (!meta || !meta.totalPages || meta.totalPages <= 1) {
 		return (
 			<Table>
 				<TableHeader>
@@ -276,12 +279,13 @@ export function DataTable<TData, TValue>({
 					</TableBody>
 				)}
 			</Table>
-			{meta && setMeta && meta.totalPages && meta.totalPages > 1 && (
+			{meta.totalPages > 1 && (
 				<div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
 					<div className="text-sm text-muted-foreground">
 						{meta.total && (
 							<span>
-								{(meta.page - 1) * meta.limit + 1} - {Math.min(meta.page * meta.limit, meta.total)} de {meta.total}
+								{(meta.page - 1) * meta.limit + 1} -{" "}
+								{Math.min(meta.page * meta.limit, meta.total)} de {meta.total}
 							</span>
 						)}
 					</div>
@@ -293,7 +297,7 @@ export function DataTable<TData, TValue>({
 									onClick={(e) => {
 										e.preventDefault();
 										if (meta.page > 1) {
-											setMeta({ page: meta.page - 1, limit: meta.limit });
+											handlePageChange(meta.page - 1);
 										}
 									}}
 									className={
@@ -311,7 +315,7 @@ export function DataTable<TData, TValue>({
 											isActive={page === meta.page}
 											onClick={(e) => {
 												e.preventDefault();
-												setMeta({ page: page as number, limit: meta.limit });
+												handlePageChange(page as number);
 											}}
 										>
 											{page}
@@ -325,7 +329,7 @@ export function DataTable<TData, TValue>({
 									onClick={(e) => {
 										e.preventDefault();
 										if (meta.page < (meta.totalPages ?? 1)) {
-											setMeta({ page: meta.page + 1, limit: meta.limit });
+											handlePageChange(meta.page + 1);
 										}
 									}}
 									className={

@@ -6,8 +6,8 @@ import { prisma } from "@/server/prisma";
 import { columns } from "./_components/columns";
 
 export const metadata: Metadata = {
-	title: "Usuários",
-	description: "Gerencie seus usuários e suas permissões.",
+	title: "Permissões",
+	description: "Gerencie as permissões do sistema.",
 };
 
 export default async function UsersPage({
@@ -20,47 +20,41 @@ export default async function UsersPage({
 }) {
 	const { page = 1, limit = 10 } = await searchParams;
 
-	if (!(await can("user:read"))) {
+	if (!(await can("permission:read"))) {
 		redirect("/dashboard?error=no_permission");
 	}
 
-	const users = (await prisma.user.findMany({
+	const permissions = (await prisma.permission.findMany({
 		skip: (Number(page) - 1) * Number(limit),
 		take: Number(limit),
 		select: {
 			id: true,
 			name: true,
-			email: true,
-			Roles: {
-				select: {
-					Role: {
-						select: {
-							id: true,
-							slug: true,
-							name: true,
-						},
-					},
-				},
-			},
+			description: true,
+			resource: true,
+			action: true,
+			code: true,
 		},
-	})).map((user) => ({
-		id: user.id,
-		name: user.name,
-		email: user.email,
-		roles: user.Roles.map((role) => role.Role),
 	}));
+
+	const total = await prisma.permission.count();
 
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Usuários</h1>
+				<h1 className="text-3xl font-bold tracking-tight">Permissões</h1>
 				<p className="text-muted-foreground">
-					Gerencie seus usuários e suas permissões.
+					Gerencie suas permissões.
 				</p>
 			</div>
 
 			<div className="grid gap-4">
-				<DataTable columns={columns} data={users} />
+				<DataTable columns={columns} data={permissions} meta={{
+					page: Number(page),
+					limit: Number(limit),
+					total,
+					totalPages: Math.ceil(total / Number(limit)),
+				}} />
 			</div>
 		</div>
 	);
