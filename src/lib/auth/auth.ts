@@ -20,6 +20,13 @@ export const authOptions: NextAuthOptions = {
           where: {
             email: credentials.email,
           },
+          include: {
+            Roles: {
+              include: {
+                Role: true,
+              },
+            },
+          },
         });
 
         if (!user || user.status !== "ACTIVE") {
@@ -40,6 +47,11 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           status: user.status,
+          roles: user.Roles.map((role) => ({
+            id: role.Role.id,
+            slug: role.Role.slug,
+            name: role.Role.name,
+          })),
         };
       },
     }),
@@ -52,6 +64,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.status = user.status;
+        token.roles = user.roles;
       }
       return token;
     },
@@ -59,6 +72,11 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.status = token.status as string;
+        session.user.roles = token.roles as {
+          id: string;
+          slug: string;
+          name: string;
+        }[];
       }
       return session;
     },

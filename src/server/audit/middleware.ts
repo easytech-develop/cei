@@ -15,6 +15,17 @@ const AUDITED_MODELS = new Set<string>([
 
 const HIDDEN_FIELDS = new Set<string>(["passwordHash"]);
 
+const IGNORED_ACTIONS = new Set<string>([
+  "findMany",
+  "findUnique",
+  "findFirst",
+  "findFirstOrThrow",
+  "findUniqueOrThrow",
+  "aggregate",
+  "count",
+  "groupBy",
+]);
+
 function mapAction(model: string, op: Prisma.PrismaAction, before?: any, after?: any): string {
   if (op === "create") return "CREATED";
   if (op === "delete") return "DELETED";
@@ -64,13 +75,10 @@ function getId(obj: any): string | undefined {
   return undefined;
 }
 
-/**
- * 👉 Agora retorna a função de middleware (não chama $use aqui)
- */
 export function auditMiddleware(prisma: PrismaClient): Prisma.Middleware {
   return async (params, next) => {
     const { model, action } = params;
-    if (!model || model === "AuditLog" || !AUDITED_MODELS.has(model)) {
+    if (!model || model === "AuditLog" || !AUDITED_MODELS.has(model) || IGNORED_ACTIONS.has(action)) {
       return next(params);
     }
 
@@ -82,7 +90,7 @@ export function auditMiddleware(prisma: PrismaClient): Prisma.Middleware {
       try {
         // biome-ignore lint/suspicious/noExplicitAny: acesso dinâmico ao model
         before = await (prisma as any)[model].findUnique?.({ where: params.args?.where }) ?? undefined;
-      } catch {}
+      } catch { }
     } else if (op === "updateMany" || op === "deleteMany") {
       before = { where: params.args?.where };
     }

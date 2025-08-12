@@ -14,14 +14,18 @@ import {
   Moon,
   Plus,
   Send,
+  Settings,
   Share2,
+  ShieldX,
   Smartphone,
   Star,
   Sun,
   Upload,
+  UserCog,
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +47,7 @@ interface SidebarItem {
   label: string;
   href?: string;
   hasNotification?: boolean;
+  roles?: string[];
   subItems?: Array<{
     id: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -177,6 +182,32 @@ const sidebarItems: SidebarItem[] = [
     href: "/send",
   },
   {
+    id: "config",
+    icon: Settings,
+    label: "Configurações",
+    roles: ["ADMIN"],
+    subItems: [
+      {
+        id: "users",
+        icon: Users,
+        label: "Usuários",
+        href: "/users",
+      },
+      {
+        id: "roles",
+        icon: UserCog,
+        label: "Roles",
+        href: "/roles",
+      },
+      {
+        id: "permissions",
+        icon: ShieldX,
+        label: "Permissões",
+        href: "/permissions",
+      },
+    ],
+  },
+  {
     id: "alerts",
     icon: AlertTriangle,
     label: "Alertas",
@@ -211,6 +242,7 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
 
   // Evita problemas de hidratação
@@ -277,13 +309,22 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
             {/* Itens da sidebar */}
             <div className="flex flex-col space-y-2 flex-1">
-              {sidebarItems.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  item={item}
-                  onClick={() => handleItemClick(item)}
-                />
-              ))}
+              {sidebarItems
+                .filter((item) => {
+                  if (item.roles) {
+                    return item.roles.some((role) =>
+                      session?.user.roles.some((r) => r.slug === role),
+                    );
+                  }
+                  return true;
+                })
+                .map((item) => (
+                  <SidebarItem
+                    key={item.id}
+                    item={item}
+                    onClick={() => handleItemClick(item)}
+                  />
+                ))}
             </div>
 
             {/* Botões de tema */}

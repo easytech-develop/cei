@@ -22,6 +22,12 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".local/seeds-permissons.ts"],
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts",
+		".local/scripts/seeds-permissons.ts"
+	],
 	"exclude": ["node_modules"]
 }

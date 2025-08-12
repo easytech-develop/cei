@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/auth";
 import { can } from "@/lib/auth/permissions";
+
+export const metadata: Metadata = {
+	title: "Despesas",
+	description: "Gerencie suas despesas e acompanhe seus gastos.",
+};
 
 export default async function ExpensesPage() {
 	const session = await getSession();
