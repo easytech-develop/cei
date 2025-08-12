@@ -1,3 +1,4 @@
+import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/server/prisma";
 
 type PermissionResource =
@@ -14,7 +15,13 @@ type PermissionResource =
   | "expense_attachment"
   | "audit_log";
 
-type PermissionAction = "read" | "create" | "update" | "delete" | "approve" | "pay";
+type PermissionAction =
+  | "read"
+  | "create"
+  | "update"
+  | "delete"
+  | "approve"
+  | "pay";
 export type PermissionCode = `${PermissionResource}:${PermissionAction}`;
 
 export async function getEffectivePermissions(userId: string) {
@@ -24,12 +31,20 @@ export async function getEffectivePermissions(userId: string) {
       select: { Permission: { select: { code: true } } },
     }),
     prisma.userPermission.findMany({
-      where: { userId },
-      select: { Permission: { select: { code: true } }, mode: true, scopeJson: true },
+      where: { userId: userId },
+      select: {
+        Permission: { select: { code: true } },
+        mode: true,
+        scopeJson: true,
+      },
     }),
   ]);
 
-  const set = new Set<string>(rolePerms.map(rp => rp.Permission.code));
+  if (rolePerms.length === 0) {
+    return { codes: new Set<PermissionCode>(), scopes: {} };
+  }
+
+  const set = new Set<string>(rolePerms.map((rp) => rp.Permission.code));
   const scopes: Record<string, unknown> = {};
 
   for (const up of userPerms) {
@@ -42,6 +57,12 @@ export async function getEffectivePermissions(userId: string) {
   return { codes: set as Set<PermissionCode>, scopes };
 }
 
-export function can(codes: Set<PermissionCode>, perm: PermissionCode) {
+export async function can(perm: PermissionCode) {
+  const session = await getSession();
+
+  if (!session?.user?.id) return false;
+
+  const { codes } = await getEffectivePermissions(session.user.id);
+
   return codes.has(perm);
 }

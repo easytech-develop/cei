@@ -1,4 +1,9 @@
+"use client";
+
 import { BarChart3, FileText, TrendingUp, Users } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -8,7 +13,21 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 
-export default function Dashboard() {
+function DashboardContent() {
+	const searchParams = useSearchParams();
+	const hasShownError = useRef(false);
+
+	useEffect(() => {
+		const error = searchParams.get("error");
+		if (error === "no_permission" && !hasShownError.current) {
+			hasShownError.current = true;
+			toast.error("Você não tem permissão para acessar essa página", {
+				description:
+					"Entre em contato com o administrador para solicitar acesso.",
+			});
+		}
+	}, [searchParams]);
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -208,4 +227,8 @@ export default function Dashboard() {
 			</div>
 		</div>
 	);
+}
+
+export default function Dashboard() {
+	return <DashboardContent />;
 }
