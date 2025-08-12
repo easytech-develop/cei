@@ -7,37 +7,37 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 /** 1) Permissões iniciais (resource:action) */
-const PERMISSION_CODES: Array<{ code: string; resource: string; action: string }> = [
+const PERMISSION_CODES: Array<{ code: string; resource: string; action: string; name: string; description: string }> = [
   // despesas
-  { code: "expense:read", resource: "expense", action: "read" },
-  { code: "expense:create", resource: "expense", action: "create" },
-  { code: "expense:update", resource: "expense", action: "update" },
-  { code: "expense:delete", resource: "expense", action: "delete" },
-  { code: "expense:approve", resource: "expense", action: "approve" },
-  { code: "expense:pay", resource: "expense", action: "pay" },
+  { code: "expense:read", resource: "expense", action: "read", name: "Visualizar Despesas", description: "Permite visualizar listagem e detalhes de despesas" },
+  { code: "expense:create", resource: "expense", action: "create", name: "Criar Despesas", description: "Permite criar novas despesas no sistema" },
+  { code: "expense:update", resource: "expense", action: "update", name: "Editar Despesas", description: "Permite editar despesas existentes" },
+  { code: "expense:delete", resource: "expense", action: "delete", name: "Excluir Despesas", description: "Permite excluir despesas do sistema" },
+  { code: "expense:approve", resource: "expense", action: "approve", name: "Aprovar Despesas", description: "Permite aprovar despesas para pagamento" },
+  { code: "expense:pay", resource: "expense", action: "pay", name: "Pagar Despesas", description: "Permite registrar pagamentos de despesas" },
   // fornecedores
-  { code: "vendor:read", resource: "vendor", action: "read" },
-  { code: "vendor:create", resource: "vendor", action: "create" },
-  { code: "vendor:update", resource: "vendor", action: "update" },
+  { code: "vendor:read", resource: "vendor", action: "read", name: "Visualizar Fornecedores", description: "Permite visualizar listagem e detalhes de fornecedores" },
+  { code: "vendor:create", resource: "vendor", action: "create", name: "Criar Fornecedores", description: "Permite cadastrar novos fornecedores" },
+  { code: "vendor:update", resource: "vendor", action: "update", name: "Editar Fornecedores", description: "Permite editar dados de fornecedores" },
   // categorias (plano de contas)
-  { code: "category:read", resource: "category", action: "read" },
-  { code: "category:create", resource: "category", action: "create" },
-  { code: "category:update", resource: "category", action: "update" },
+  { code: "category:read", resource: "category", action: "read", name: "Visualizar Categorias", description: "Permite visualizar categorias do plano de contas" },
+  { code: "category:create", resource: "category", action: "create", name: "Criar Categorias", description: "Permite criar novas categorias no plano de contas" },
+  { code: "category:update", resource: "category", action: "update", name: "Editar Categorias", description: "Permite editar categorias existentes" },
   // contas
-  { code: "account:read", resource: "account", action: "read" },
+  { code: "account:read", resource: "account", action: "read", name: "Visualizar Contas", description: "Permite visualizar contas bancárias e caixa" },
   // alunos
-  { code: "student:read", resource: "student", action: "read" },
-  { code: "student:create", resource: "student", action: "create" },
-  { code: "student:update", resource: "student", action: "update" },
+  { code: "student:read", resource: "student", action: "read", name: "Visualizar Alunos", description: "Permite visualizar listagem e dados de alunos" },
+  { code: "student:create", resource: "student", action: "create", name: "Criar Alunos", description: "Permite cadastrar novos alunos" },
+  { code: "student:update", resource: "student", action: "update", name: "Editar Alunos", description: "Permite editar dados de alunos" },
   // turmas
-  { code: "classroom:read", resource: "classroom", action: "read" },
-  { code: "classroom:create", resource: "classroom", action: "create" },
-  { code: "classroom:update", resource: "classroom", action: "update" },
+  { code: "classroom:read", resource: "classroom", action: "read", name: "Visualizar Turmas", description: "Permite visualizar listagem e detalhes de turmas" },
+  { code: "classroom:create", resource: "classroom", action: "create", name: "Criar Turmas", description: "Permite criar novas turmas" },
+  { code: "classroom:update", resource: "classroom", action: "update", name: "Editar Turmas", description: "Permite editar dados de turmas" },
 ];
 
 /** 2) Roles e seus conjuntos de permissões */
 const ROLE_DEFS: Array<{ slug: string; name: string; permissions: string[] }> = [
-  { slug: "OWNER", name: "Proprietário", permissions: ["*"] },
+  { slug: "ADMIN", name: "Administrador", permissions: ["*"] },
   {
     slug: "DIRECTOR",
     name: "Diretor(a)",
@@ -134,7 +134,7 @@ async function main() {
 
   console.log("== Seeding: admin user ==");
   // cria/atualiza usuário admin
-  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
 
   const admin = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL },
@@ -142,17 +142,17 @@ async function main() {
     create: { email: ADMIN_EMAIL, name: ADMIN_NAME, passwordHash, status: "ACTIVE" as any },
   });
 
-  // garante vínculo com OWNER
-  const ownerRole = await prisma.role.findUnique({ where: { slug: "OWNER" } });
-  if (!ownerRole) throw new Error("Role OWNER não encontrada (seed falhou antes).");
+  // garante vínculo com ADMIN
+  const adminRole = await prisma.role.findUnique({ where: { slug: "ADMIN" } });
+  if (!adminRole) throw new Error("Role ADMIN não encontrada (seed falhou antes).");
 
   await prisma.userRole.upsert({
-    where: { userId_roleId: { userId: admin.id, roleId: ownerRole.id } },
+    where: { userId_roleId: { userId: admin.id, roleId: adminRole.id } },
     update: {},
-    create: { userId: admin.id, roleId: ownerRole.id },
+    create: { userId: admin.id, roleId: adminRole.id },
   });
 
-  console.log(`Admin pronto: ${ADMIN_EMAIL} (role OWNER) ✅`);
+  console.log(`Admin pronto: ${ADMIN_EMAIL} (role ADMIN) ✅`);
 }
 
 main()
