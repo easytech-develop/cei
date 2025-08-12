@@ -320,49 +320,67 @@ interface SidebarItemProps {
 
 function SidebarItem({ item, onClick, onSubItemClick }: SidebarItemProps) {
   const Icon = item.icon;
+  const [isOpen, setIsOpen] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => {
+      setIsOpen(false);
+    }, 100); // Pequeno delay para evitar fechamento acidental
+    setTimeoutId(timeout);
+  };
 
   if (item.subItems) {
     return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 relative"
-              >
-                <Icon className="h-4 w-4 text-sidebar-foreground" />
-                {item.hasNotification && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full border-2 border-sidebar" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">{item.label}</TooltipContent>
-          </Tooltip>
-        </PopoverTrigger>
-        <PopoverContent
-          side="right"
-          align="center"
-          className="w-48 p-2 bg-sidebar border-sidebar-border"
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <div
+          className="relative"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
-          <div className="space-y-1">
-            {item.subItems.map((subItem) => {
-              const SubIcon = subItem.icon;
-              return (
-                <Button
-                  key={subItem.id}
-                  variant="ghost"
-                  className="w-full justify-start h-8 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  onClick={() => onSubItemClick(subItem.href)}
-                >
-                  <SubIcon className="h-4 w-4 mr-2" />
-                  {subItem.label}
-                </Button>
-              );
-            })}
-          </div>
-        </PopoverContent>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 relative"
+            >
+              <Icon className="h-4 w-4 text-sidebar-foreground" />
+              {item.hasNotification && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full border-2 border-sidebar" />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            side="right"
+            align="center"
+            className="w-min p-2 bg-sidebar border-sidebar-border"
+          >
+            <div className="space-y-1">
+              {item.subItems.map((subItem) => {
+                const SubIcon = subItem.icon;
+                return (
+                  <Button
+                    key={subItem.id}
+                    variant="ghost"
+                    className="w-full justify-start h-8 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={() => onSubItemClick(subItem.href)}
+                  >
+                    <SubIcon className="h-4 w-4 mr-2" />
+                    {subItem.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </div>
       </Popover>
     );
   }
