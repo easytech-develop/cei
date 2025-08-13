@@ -19,11 +19,12 @@ A feature de usuários permite o gerenciamento completo de usuários e cargos do
 
 - **CRUD de Usuários**: Criar, listar, atualizar e excluir usuários
 - **CRUD de Cargos**: Criar, listar, atualizar e excluir cargos
-- **Gerenciamento de Cargos**: Associar usuários a cargos específicos
+- **Gerenciamento de Cargos**: Associar usuários a múltiplos cargos específicos
 - **Controle de Status**: Ativar/suspender usuários
 - **Soft Delete**: Exclusão lógica com possibilidade de restauração
 - **Validações**: Validação de dados e regras de negócio
 - **Interface Responsiva**: Interface moderna com tabela de dados
+- **Seleção Múltipla de Roles**: Interface avançada com popover e command para seleção de cargos
 
 ## 🗄️ Tabelas do Schema
 
@@ -119,9 +120,9 @@ model UserRole {
 ## 📁 Estrutura de Arquivos
 
 ```
-src/app/(main)/(users)/
+src/app/(main)/(feature-users)/
 ├── README.md                    # Esta documentação
-├── users/                       # Página principal de usuários
+├── (pages)/users/               # Página principal de usuários
 │   ├── page.tsx                # Página de listagem
 │   └── _components/            # Componentes da interface
 │       ├── create-user.tsx     # Modal de criação
@@ -133,8 +134,10 @@ src/app/(main)/(users)/
 ├── queries/
 │   ├── users.ts                # Hooks React Query para usuários
 │   └── roles.ts                # Hooks React Query para cargos
-└── server/
-    └── users.ts                # Funções server-side (APIs)
+├── server/
+│   └── users.ts                # Funções server-side (APIs)
+└── validators/
+    └── users.ts                # Schemas de validação Zod
 ```
 
 ## ⚙️ Funcionalidades
@@ -142,21 +145,24 @@ src/app/(main)/(users)/
 ### 1. Listagem de Usuários
 - **Paginação**: Suporte a paginação com limite configurável
 - **Busca**: Busca por nome e email
-- **Filtros**: Filtro por cargos específicos
+- **Filtros**: Filtro por cargos específicos com seleção múltipla
 - **Ordenação**: Ordenação por data de criação e nome
 - **Status**: Exibe apenas usuários ativos (não deletados)
+- **Exibição de Roles**: Mostra no máximo 2 roles por usuário com indicador "+X" para roles adicionais
 
 ### 2. Criação de Usuário
 - **Validações**: Validação de campos obrigatórios
 - **Email Único**: Verificação de email duplicado
 - **Restauração**: Restaura usuário deletado se email existir
 - **Hash de Senha**: Senha criptografada com bcrypt
-- **Associação de Cargo**: Criação automática da relação UserRole
+- **Seleção Múltipla de Roles**: Interface com popover e command para seleção de múltiplos cargos
+- **Validação de Roles**: Pelo menos um cargo é obrigatório
 
 ### 3. Atualização de Usuário
 - **Validações**: Validação de dados de entrada
 - **Email Único**: Verificação de email duplicado (exceto próprio)
 - **Transação**: Atualização atômica de usuário e cargos
+- **Seleção Múltipla de Roles**: Interface consistente com criação
 - **Auditoria**: Registro de alterações
 
 ### 4. Exclusão de Usuário
@@ -166,8 +172,9 @@ src/app/(main)/(users)/
 
 ### 5. Gerenciamento de Cargos
 - **Listagem**: Lista todos os cargos disponíveis
-- **Associação**: Associa usuários a cargos específicos
+- **Associação Múltipla**: Associa usuários a múltiplos cargos específicos
 - **Validação**: Verifica se cargo existe
+- **Interface Avançada**: Popover com command para melhor UX
 
 ### 6. CRUD de Cargos
 - **Listagem de Cargos**: Lista cargos com paginação e busca
@@ -214,7 +221,7 @@ createUser({
   email: string;
   password: string;
   status: "ACTIVE" | "SUSPENDED";
-  roleId: string;
+  roles: string[]; // Array de IDs de roles
 })
 ```
 
@@ -226,7 +233,7 @@ updateUser(id: string, {
   name: string;
   email: string;
   status: "ACTIVE" | "SUSPENDED";
-  roleId: string;
+  roles: string[]; // Array de IDs de roles
 })
 ```
 
@@ -296,9 +303,10 @@ Tabela responsiva com listagem de usuários.
 **Funcionalidades:**
 - Paginação automática
 - Busca em tempo real
-- Filtros por cargo
+- Filtros por cargo com seleção múltipla
 - Ações de edição e exclusão
 - Persistência de estado no localStorage
+- **Exibição limitada de roles**: Máximo 2 roles visíveis com indicador "+X"
 
 ### CreateUser
 Modal para criação de usuários.
@@ -308,7 +316,14 @@ Modal para criação de usuários.
 - Email (obrigatório, único)
 - Senha (obrigatório, mínimo 6 caracteres)
 - Status (ACTIVE/SUSPENDED)
-- Cargo (obrigatório)
+- **Roles (obrigatório)**: Seleção múltipla com popover e command
+
+**Interface de Seleção de Roles:**
+- Popover com interface de comando
+- Busca em tempo real
+- Seleção múltipla com checkboxes
+- Opção para limpar seleção
+- Indicador visual de itens selecionados
 
 ### UpdateUser
 Modal para edição de usuários.
@@ -317,7 +332,12 @@ Modal para edição de usuários.
 - Nome (obrigatório)
 - Email (obrigatório, único)
 - Status (ACTIVE/SUSPENDED)
-- Cargo (obrigatório)
+- **Roles (obrigatório)**: Seleção múltipla com popover e command
+
+**Interface de Seleção de Roles:**
+- Mesma interface do CreateUser para consistência
+- Pré-seleção dos roles atuais do usuário
+- Validação de pelo menos um role
 
 ### DeleteUser
 Modal de confirmação para exclusão.
@@ -361,16 +381,41 @@ Modal de confirmação para exclusão de cargos.
 ## ✅ Validações
 
 ### Schemas Zod
-- **createUserSchema**: Validação para criação
-- **updateUserSchema**: Validação para atualização
-- **changePasswordSchema**: Validação para alteração de senha
-- **createRoleSchema**: Validação para criação de cargos
-- **updateRoleSchema**: Validação para atualização de cargos
+
+#### createUserSchema
+```typescript
+{
+  name: string; // mínimo 1 caractere
+  email: string; // email válido
+  password: string; // mínimo 6 caracteres
+  status: "ACTIVE" | "SUSPENDED";
+  roles: string[]; // array não vazio
+}
+```
+
+#### updateUserSchema
+```typescript
+{
+  name: string; // mínimo 1, máximo 255 caracteres
+  email: string; // email válido, máximo 255 caracteres
+  status: "ACTIVE" | "SUSPENDED";
+  roles: string[]; // array não vazio
+}
+```
+
+#### changePasswordSchema
+```typescript
+{
+  currentPassword: string;
+  newPassword: string; // mínimo 6 caracteres
+  confirmPassword: string; // deve coincidir com newPassword
+}
+```
 
 ### Regras de Negócio
 - Email deve ser único (exceto próprio na edição)
 - Senha mínima de 6 caracteres
-- Cargo é obrigatório
+- **Pelo menos um role é obrigatório**
 - Nome e email são obrigatórios
 - Validação de usuário existente antes de operações
 - Slug de cargo deve ser único
@@ -386,6 +431,7 @@ Modal de confirmação para exclusão de cargos.
 - Verificação de slug duplicado
 - Validação de cargo existente
 - Verificação de usuários associados antes da exclusão
+- **Validação de array de roles não vazio**
 
 ## 🔐 Permissões
 
@@ -416,17 +462,19 @@ Navegue para `/users` (requer permissão `user:read`)
 ### 2. Listar Usuários
 - A tabela carrega automaticamente
 - Use a busca para filtrar por nome/email
-- Use os filtros de cargo para refinar resultados
+- Use os filtros de cargo para refinar resultados (seleção múltipla)
+- **Roles são exibidos com limite de 2 visíveis + indicador de quantidade**
 
 ### 3. Criar Usuário
 - Clique no botão "+" no canto superior direito
 - Preencha todos os campos obrigatórios
-- Selecione um cargo
+- **Selecione um ou mais cargos usando o popover de seleção**
 - Clique em "Criar"
 
 ### 4. Editar Usuário
 - Clique no ícone de edição na linha do usuário
 - Modifique os campos desejados
+- **Gerencie os cargos usando a interface de seleção múltipla**
 - Clique em "Salvar"
 
 ### 5. Excluir Usuário
@@ -470,6 +518,8 @@ DATABASE_URL="postgresql://..."
 - `zod` - Validação de schemas
 - `bcrypt` - Hash de senhas
 - `next-auth` - Autenticação e permissões
+- `@radix-ui/react-popover` - Componentes de interface
+- `@radix-ui/react-command` - Interface de comando
 
 ## 📝 Notas Técnicas
 
@@ -477,19 +527,33 @@ DATABASE_URL="postgresql://..."
 - Consultas otimizadas com índices no banco
 - Paginação para grandes volumes de dados
 - Queries em paralelo quando possível
+- **Limitação de exibição de roles para melhor performance visual**
 
 ### Segurança
 - Senhas criptografadas com bcrypt
 - Validação server-side rigorosa
 - Verificação de permissões em todas as operações
+- **Validação de array de roles para prevenir dados inválidos**
 
 ### Auditoria
 - Todas as operações são registradas no AuditLog
 - Soft delete para preservar histórico
 - Timestamps automáticos
+- **Registro de mudanças em múltiplos roles**
 
 ### UX/UI
 - Interface responsiva e moderna
 - Feedback visual para todas as ações
 - Estados de loading e erro
 - Persistência de configurações do usuário
+- **Interface avançada de seleção múltipla de roles**
+- **Exibição otimizada de roles na tabela**
+- **Popover com command para melhor usabilidade**
+
+### Mudanças Recentes (v2.0)
+- **Suporte a múltiplos roles por usuário**
+- **Novo schema com roles como array**
+- **Interface de seleção com popover e command**
+- **Limitação de exibição de roles na tabela (máximo 2)**
+- **Melhorias na validação e feedback visual**
+- **Consistência entre componentes CreateUser e UpdateUser**
