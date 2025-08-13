@@ -1,11 +1,16 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useGetUsers } from "@/lib/queries/users";
-import type { UserWithRoles } from "@/server/users";
 import type { Meta } from "@/types/generics";
+import type { UserWithRoles } from "@/types/users";
+import DeleteUser from "./delete-user";
+import UpdateUser from "./update-user";
 
 const columns: ColumnDef<UserWithRoles>[] = [
   {
@@ -18,10 +23,40 @@ const columns: ColumnDef<UserWithRoles>[] = [
   },
   {
     accessorKey: "roles",
-    header: "Roles",
+    header: "Cargo",
     cell: ({ row }) => {
       return (
-        <div>{row.original.roles.map((role) => role.name).join(", ")}</div>
+        <div className="flex flex-wrap gap-2">
+          {row.original.roles.map((role) => (
+            <Badge key={role.id}>{role.name}</Badge>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "actions",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <div className="flex gap-2">
+          <UpdateUser
+            trigger={
+              <Button size="icon" variant="ghost">
+                <Edit />
+              </Button>
+            }
+            user={row.original}
+          />
+          <DeleteUser
+            trigger={
+              <Button size="icon" variant="ghost">
+                <Trash2 />
+              </Button>
+            }
+            user={row.original}
+          />
+        </div>
       );
     },
   },

@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsers } from "@/server/users";
 import type { Meta, UseQueryOptions } from "@/types/generics";
 
+export const USE_GET_USERS_KEY = ["useGetUsers"];
+
 export function useGetUsers({
   meta,
   options,
@@ -12,7 +14,7 @@ export function useGetUsers({
   options?: UseQueryOptions;
 }) {
   return useQuery({
-    queryKey: ["useGetUsers", meta],
+    queryKey: [...USE_GET_USERS_KEY, meta],
     queryFn: async () => {
       const response = await getUsers({ meta });
       return response.data ?? {
