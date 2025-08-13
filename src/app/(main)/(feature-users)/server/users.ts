@@ -1,6 +1,6 @@
 "use server";
 
-import type { Prisma, Role, User } from "@prisma/client";
+import type { Prisma, User } from "@prisma/client";
 import { hashPassword, logError } from "@/lib/utils";
 import type {
   CreateUserSchema,
@@ -10,7 +10,6 @@ import { prisma } from "@/server/prisma";
 import type { ActionResponse, Meta } from "@/types/generics";
 import type { UserWithRoles } from "../types/users";
 
-// Constantes para mensagens de erro e sucesso
 const MESSAGES = {
   USERS: {
     LISTED_SUCCESS: "Usuários listados com sucesso",
@@ -25,13 +24,8 @@ const MESSAGES = {
     EMAIL_EXISTS: "Já existe um usuário com este email",
     ROLE_REQUIRED: "Informe o cargo",
   },
-  ROLES: {
-    LISTED_SUCCESS: "Cargos listados com sucesso",
-    LIST_ERROR: "Erro ao listar cargos",
-  },
 } as const;
 
-// Validações auxiliares
 const validateUserExists = async (id: string): Promise<User | null> => {
   const user = await prisma.user.findUnique({
     where: { id },
@@ -154,7 +148,6 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
   user: User;
 }> {
   try {
-    // Validações
     if (!data.roleId) {
       return { success: false, message: MESSAGES.USERS.ROLE_REQUIRED };
     }
@@ -163,7 +156,6 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
       return { success: false, message: "Todos os campos são obrigatórios" };
     }
 
-    // Verificar se o email já existe
     const emailExists = await validateEmailUniqueness(data.email.trim());
     if (!emailExists) {
       return { success: false, message: MESSAGES.USERS.EMAIL_EXISTS };
@@ -303,28 +295,6 @@ export async function updateUser(
   } catch (error) {
     logError({ error, where: "updateUser" });
     return { success: false, message: MESSAGES.USERS.UPDATED_ERROR };
-  }
-}
-
-export async function getRoles(): ActionResponse<{
-  roles: Role[];
-}> {
-  try {
-    const roles = await prisma.role.findMany({
-      where: {
-        // Adicionar filtro para roles ativas se necessário
-      },
-      orderBy: [{ name: "asc" }, { createdAt: "asc" }],
-    });
-
-    return {
-      success: true,
-      message: MESSAGES.ROLES.LISTED_SUCCESS,
-      data: { roles },
-    };
-  } catch (error) {
-    logError({ error, where: "getRoles" });
-    return { success: false, message: MESSAGES.ROLES.LIST_ERROR };
   }
 }
 

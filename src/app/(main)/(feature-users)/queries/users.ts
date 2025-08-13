@@ -6,17 +6,24 @@ import { getUsers } from "../server/users";
 
 export const USE_GET_USERS_KEY = ["useGetUsers"];
 
-export function useGetUsers({
-  meta,
-  options,
-}: {
-  meta: Meta;
+export function useGetUsers(params?: {
+  meta?: Meta;
+  filters?: {
+    search?: string;
+    roles?: string[];
+  };
   options?: UseQueryOptions;
 }) {
+  const { meta, filters, options } = params ?? {};
+  const metaQuery = meta ?? {
+    page: 1,
+    limit: 100,
+  };
+
   return useQuery({
-    queryKey: [...USE_GET_USERS_KEY, meta],
+    queryKey: [...USE_GET_USERS_KEY, metaQuery, filters],
     queryFn: async () => {
-      const response = await getUsers({ meta });
+      const response = await getUsers({ meta: metaQuery, filters });
       return (
         response.data ?? {
           users: [],
