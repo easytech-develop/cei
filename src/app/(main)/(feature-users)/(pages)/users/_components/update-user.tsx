@@ -6,6 +6,10 @@ import { Dialog } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  type UpdateUserSchema,
+  updateUserSchema,
+} from "@/app/(main)/(feature-users)/validators/users";
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -32,10 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { queryClient } from "@/lib/queries/query-client";
-import {
-  type UpdateUserSchema,
-  updateUserSchema,
-} from "@/lib/validators/users";
 import { useGetRoles } from "../../../queries/roles";
 import { USE_GET_USERS_KEY } from "../../../queries/users";
 import { updateUser } from "../../../server/users";
@@ -53,7 +53,8 @@ export default function UpdateUser({
 }: UpdateUserProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: roles = [], isLoading: isLoadingRoles } = useGetRoles();
+  const { data: rolesData, isLoading: isLoadingRoles } = useGetRoles();
+  const roles = rolesData?.roles ?? [];
 
   const form = useForm<UpdateUserSchema>({
     defaultValues: {

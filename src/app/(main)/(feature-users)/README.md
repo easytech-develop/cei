@@ -15,9 +15,10 @@ Esta documentação descreve a feature de gerenciamento de usuários do sistema,
 
 ## 🎯 Visão Geral
 
-A feature de usuários permite o gerenciamento completo de usuários do sistema, incluindo:
+A feature de usuários permite o gerenciamento completo de usuários e cargos do sistema, incluindo:
 
 - **CRUD de Usuários**: Criar, listar, atualizar e excluir usuários
+- **CRUD de Cargos**: Criar, listar, atualizar e excluir cargos
 - **Gerenciamento de Cargos**: Associar usuários a cargos específicos
 - **Controle de Status**: Ativar/suspender usuários
 - **Soft Delete**: Exclusão lógica com possibilidade de restauração
@@ -168,6 +169,15 @@ src/app/(main)/(users)/
 - **Associação**: Associa usuários a cargos específicos
 - **Validação**: Verifica se cargo existe
 
+### 6. CRUD de Cargos
+- **Listagem de Cargos**: Lista cargos com paginação e busca
+- **Criação de Cargo**: Cria novos cargos com validação de slug único
+- **Atualização de Cargo**: Atualiza informações de cargos existentes
+- **Exclusão de Cargo**: Exclui cargos (apenas se não houver usuários associados)
+- **Validações**: Validação de nome e slug obrigatórios
+- **Slug Único**: Verificação de slug duplicado
+- **Proteção**: Impede exclusão de cargos com usuários associados
+
 ## 🔌 APIs
 
 ### getUsers
@@ -228,10 +238,54 @@ deleteUser(id: string)
 ```
 
 ### getRoles
-Lista todos os cargos disponíveis.
+Lista cargos com paginação e filtros.
 
 ```typescript
-getRoles()
+getRoles({
+  meta: { page: 1, limit: 10 },
+  filters?: {
+    search?: string;
+  }
+})
+```
+
+**Retorna:**
+```typescript
+{
+  success: boolean;
+  message: string;
+  data?: {
+    roles: Role[];
+    meta: Meta;
+  };
+}
+```
+
+### createRole
+Cria um novo cargo.
+
+```typescript
+createRole({
+  name: string;
+  slug: string;
+})
+```
+
+### updateRole
+Atualiza um cargo existente.
+
+```typescript
+updateRole(id: string, {
+  name: string;
+  slug: string;
+})
+```
+
+### deleteRole
+Exclui um cargo (apenas se não houver usuários associados).
+
+```typescript
+deleteRole(id: string)
 ```
 
 ## 🧩 Componentes
@@ -273,12 +327,45 @@ Modal de confirmação para exclusão.
 - Exclusão lógica (soft delete)
 - Feedback visual
 
+### ListRoles
+Tabela responsiva com listagem de cargos.
+
+**Funcionalidades:**
+- Paginação automática
+- Busca em tempo real
+- Ações de edição e exclusão
+- Persistência de estado no localStorage
+
+### CreateRole
+Modal para criação de cargos.
+
+**Campos:**
+- Nome (obrigatório)
+- Slug (obrigatório, único, convertido para maiúsculas)
+
+### UpdateRole
+Modal para edição de cargos.
+
+**Campos:**
+- Nome (obrigatório)
+- Slug (obrigatório, único, convertido para maiúsculas)
+
+### DeleteRole
+Modal de confirmação para exclusão de cargos.
+
+**Funcionalidades:**
+- Confirmação antes da exclusão
+- Verificação de usuários associados
+- Feedback visual
+
 ## ✅ Validações
 
 ### Schemas Zod
 - **createUserSchema**: Validação para criação
 - **updateUserSchema**: Validação para atualização
 - **changePasswordSchema**: Validação para alteração de senha
+- **createRoleSchema**: Validação para criação de cargos
+- **updateRoleSchema**: Validação para atualização de cargos
 
 ### Regras de Negócio
 - Email deve ser único (exceto próprio na edição)
@@ -286,12 +373,19 @@ Modal de confirmação para exclusão.
 - Cargo é obrigatório
 - Nome e email são obrigatórios
 - Validação de usuário existente antes de operações
+- Slug de cargo deve ser único
+- Nome de cargo é obrigatório
+- Validação de cargo existente antes de operações
+- Proteção contra exclusão de cargos com usuários associados
 
 ### Validações Server-Side
 - Verificação de email duplicado
 - Validação de usuário existente
 - Verificação de soft delete
 - Transações para operações complexas
+- Verificação de slug duplicado
+- Validação de cargo existente
+- Verificação de usuários associados antes da exclusão
 
 ## 🔐 Permissões
 
@@ -302,6 +396,10 @@ A feature de usuários utiliza o sistema de permissões do NextAuth:
 - `user:create` - Criar usuários
 - `user:update` - Atualizar usuários
 - `user:delete` - Excluir usuários
+- `role:read` - Visualizar cargos
+- `role:create` - Criar cargos
+- `role:update` - Atualizar cargos
+- `role:delete` - Excluir cargos
 
 ### Verificação de Permissões
 ```typescript
@@ -335,6 +433,29 @@ Navegue para `/users` (requer permissão `user:read`)
 - Clique no ícone de lixeira na linha do usuário
 - Confirme a exclusão no modal
 - O usuário será marcado como deletado
+
+### 6. Gerenciar Cargos
+Navegue para `/roles` (requer permissão `role:read`)
+
+#### Listar Cargos
+- A tabela carrega automaticamente
+- Use a busca para filtrar por nome/slug
+
+#### Criar Cargo
+- Clique no botão "+" no canto superior direito
+- Preencha nome e slug (obrigatórios)
+- O slug será convertido automaticamente para maiúsculas
+- Clique em "Criar"
+
+#### Editar Cargo
+- Clique no ícone de edição na linha do cargo
+- Modifique os campos desejados
+- Clique em "Salvar"
+
+#### Excluir Cargo
+- Clique no ícone de lixeira na linha do cargo
+- Confirme a exclusão no modal
+- O cargo será excluído (apenas se não houver usuários associados)
 
 ## 🔧 Configurações
 

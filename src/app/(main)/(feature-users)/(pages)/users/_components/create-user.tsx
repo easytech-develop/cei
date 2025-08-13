@@ -5,6 +5,10 @@ import type { User } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  type CreateUserSchema,
+  createUserSchema,
+} from "@/app/(main)/(feature-users)/validators/users";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,10 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { queryClient } from "@/lib/queries/query-client";
-import {
-  type CreateUserSchema,
-  createUserSchema,
-} from "@/lib/validators/users";
 import { useGetRoles } from "../../../queries/roles";
 import { USE_GET_USERS_KEY } from "../../../queries/users";
 import { createUser } from "../../../server/users";
@@ -48,7 +48,8 @@ type CreateUserProps = {
 export default function CreateUser({ trigger, onSuccess }: CreateUserProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: roles = [], isLoading: isLoadingRoles } = useGetRoles();
+  const { data: rolesData, isLoading: isLoadingRoles } = useGetRoles();
+  const roles = rolesData?.roles ?? [];
 
   const form = useForm<CreateUserSchema>({
     defaultValues: {

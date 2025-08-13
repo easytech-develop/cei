@@ -1,11 +1,11 @@
 "use server";
 
 import type { Prisma, User } from "@prisma/client";
-import { hashPassword, logError } from "@/lib/utils";
 import type {
   CreateUserSchema,
   UpdateUserSchema,
-} from "@/lib/validators/users";
+} from "@/app/(main)/(feature-users)/validators/users";
+import { hashPassword, logError } from "@/lib/utils";
 import { prisma } from "@/server/prisma";
 import type { ActionResponse, Meta } from "@/types/generics";
 import type { UserWithRoles } from "../types/users";
@@ -66,7 +66,6 @@ export async function getUsers({
   try {
     const { page, limit } = meta;
 
-    // Validação dos parâmetros
     if (page < 1 || limit < 1) {
       return {
         success: false,
