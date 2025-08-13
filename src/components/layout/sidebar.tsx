@@ -16,7 +16,7 @@ import {
   Send,
   Settings,
   Share2,
-  ShieldX,
+  Shield,
   Smartphone,
   Star,
   Sun,
@@ -201,7 +201,7 @@ const sidebarItems: SidebarItem[] = [
       },
       {
         id: "permissions",
-        icon: ShieldX,
+        icon: Shield,
         label: "Permissões",
         href: "/permissions",
       },

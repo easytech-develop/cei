@@ -2,7 +2,7 @@
 
 import type { Role } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import type { Meta } from "@/types/generics";
 import { useGetRoles } from "../../../queries/roles";
 import DeleteRole from "./delete-role";
 import UpdateRole from "./update-role";
+import ManageRolePermissions from "@/app/(main)/(feature-permissions)/(pages)/permissions/_components/manage-role-permissions";
 
 const columns: ColumnDef<Role>[] = [
   {
@@ -38,6 +39,14 @@ const columns: ColumnDef<Role>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex gap-2">
+          <ManageRolePermissions
+            trigger={
+              <Button size="icon" variant="ghost" title="Gerenciar permissões">
+                <Shield className="h-4 w-4" />
+              </Button>
+            }
+            role={row.original}
+          />
           <UpdateRole
             trigger={
               <Button size="icon" variant="ghost">

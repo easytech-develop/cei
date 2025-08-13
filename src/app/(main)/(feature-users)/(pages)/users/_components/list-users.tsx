@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Check, CircleFadingPlus, Edit, Loader2, Trash2 } from "lucide-react";
+import { Check, CircleFadingPlus, Edit, Loader2, Trash2, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { useGetUsers } from "../../../queries/users";
 import type { UserWithRoles } from "../../../types/users";
 import DeleteUser from "./delete-user";
 import UpdateUser from "./update-user";
+import ManageUserPermissions from "@/app/(main)/(feature-permissions)/(pages)/permissions/_components/manage-user-permissions";
 
 const columns: ColumnDef<UserWithRoles>[] = [
   {
@@ -68,6 +69,14 @@ const columns: ColumnDef<UserWithRoles>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex gap-2">
+          <ManageUserPermissions
+            trigger={
+              <Button size="icon" variant="ghost" title="Gerenciar permissões">
+                <User className="h-4 w-4" />
+              </Button>
+            }
+            user={row.original}
+          />
           <UpdateUser
             trigger={
               <Button size="icon" variant="ghost">
