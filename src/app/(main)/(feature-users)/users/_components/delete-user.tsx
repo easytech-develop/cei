@@ -15,8 +15,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { queryClient } from "@/lib/queries/query-client";
-import { USE_GET_USERS_KEY } from "@/lib/queries/users";
-import { deleteUser } from "@/server/users";
+import { USE_GET_USERS_KEY } from "../../queries/users";
+import { deleteUser } from "../../server/users";
 
 type DeleteUserProps = {
   trigger: React.ReactNode;

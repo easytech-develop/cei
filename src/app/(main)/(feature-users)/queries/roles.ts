@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getRoles } from "@/server/users";
+import { getRoles } from "../server/users";
 
 export const USE_GET_ROLES_KEY = ["roles"];
 

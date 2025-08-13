@@ -6,6 +6,7 @@ import { Dialog } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useGetRoles } from "@/app/(main)/(users)/queries/roles";
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -32,13 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { queryClient } from "@/lib/queries/query-client";
-import { useGetRoles } from "@/lib/queries/roles";
-import { USE_GET_USERS_KEY } from "@/lib/queries/users";
 import {
   type UpdateUserSchema,
   updateUserSchema,
 } from "@/lib/validators/users";
-import { updateUser } from "@/server/users";
+import { USE_GET_USERS_KEY } from "../../queries/users";
+import { updateUser } from "../../server/users";
 
 type UpdateUserProps = {
   trigger: React.ReactNode;

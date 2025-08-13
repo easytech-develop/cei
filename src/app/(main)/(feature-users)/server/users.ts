@@ -1,11 +1,14 @@
 "use server";
 
 import type { Prisma, Role, User } from "@prisma/client";
+import type { UserWithRoles } from "@/app/(main)/(users)/types/users";
 import { hashPassword, logError } from "@/lib/utils";
-import type { CreateUserSchema, UpdateUserSchema } from "@/lib/validators/users";
+import type {
+  CreateUserSchema,
+  UpdateUserSchema,
+} from "@/lib/validators/users";
+import { prisma } from "@/server/prisma";
 import type { ActionResponse, Meta } from "@/types/generics";
-import type { UserWithRoles } from "@/types/users";
-import { prisma } from "./prisma";
 
 // Constantes para mensagens de erro e sucesso
 const MESSAGES = {
@@ -38,7 +41,7 @@ const validateUserExists = async (id: string): Promise<User | null> => {
 
 const validateEmailUniqueness = async (
   email: string,
-  excludeId?: string
+  excludeId?: string,
 ): Promise<boolean> => {
   const where: Prisma.UserWhereInput = {
     email,
@@ -55,7 +58,7 @@ const validateEmailUniqueness = async (
 
 export async function getUsers({
   meta,
-  filters
+  filters,
 }: {
   meta: Meta;
   filters?: {
@@ -73,7 +76,7 @@ export async function getUsers({
     if (page < 1 || limit < 1) {
       return {
         success: false,
-        message: "Parâmetros de paginação inválidos"
+        message: "Parâmetros de paginação inválidos",
       };
     }
 
@@ -103,10 +106,7 @@ export async function getUsers({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: [
-          { createdAt: "desc" },
-          { name: "asc" },
-        ],
+        orderBy: [{ createdAt: "desc" }, { name: "asc" }],
         include: {
           Roles: {
             include: {
@@ -238,7 +238,7 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
 
 export async function updateUser(
   id: string,
-  data: UpdateUserSchema
+  data: UpdateUserSchema,
 ): ActionResponse<{
   user: User;
 }> {
@@ -314,10 +314,7 @@ export async function getRoles(): ActionResponse<{
       where: {
         // Adicionar filtro para roles ativas se necessário
       },
-      orderBy: [
-        { name: "asc" },
-        { createdAt: "asc" },
-      ],
+      orderBy: [{ name: "asc" }, { createdAt: "asc" }],
     });
 
     return {
