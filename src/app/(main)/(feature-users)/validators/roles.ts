@@ -8,6 +8,7 @@ export const createRoleSchema = z.object({
 
 // Schema para atualização de cargo
 export const updateRoleSchema = z.object({
+  id: z.string().nonempty("ID é obrigatório"),
   name: z.string().min(1, "Nome é obrigatório").max(255, "Nome muito longo"),
   slug: z.string().min(1, "Slug é obrigatório").max(50, "Slug muito longo"),
 })

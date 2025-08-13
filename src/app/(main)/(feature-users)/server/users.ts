@@ -147,7 +147,7 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
   user: User;
 }> {
   try {
-    if (!data.roleId) {
+    if (data.roles.length === 0) {
       return { success: false, message: MESSAGES.USERS.ROLE_REQUIRED };
     }
 
@@ -189,8 +189,8 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
         where: { userId: user.id },
       });
 
-      await prisma.userRole.create({
-        data: { userId: user.id, roleId: data.roleId },
+      await prisma.userRole.createMany({
+        data: data.roles.map((roleId) => ({ userId: user.id, roleId })),
       });
 
       return {
@@ -209,9 +209,7 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
         status: data.status,
         passwordHash,
         Roles: {
-          create: {
-            roleId: data.roleId,
-          },
+          create: data.roles.map((roleId) => ({ roleId })),
         },
       },
     });
@@ -228,18 +226,17 @@ export async function createUser(data: CreateUserSchema): ActionResponse<{
 }
 
 export async function updateUser(
-  id: string,
   data: UpdateUserSchema,
 ): ActionResponse<{
   user: User;
 }> {
   try {
     // Validações
-    if (!id?.trim()) {
+    if (!data.id.trim()) {
       return { success: false, message: "ID do usuário é obrigatório" };
     }
 
-    if (!data.roleId) {
+    if (!data.roles?.length) {
       return { success: false, message: MESSAGES.USERS.ROLE_REQUIRED };
     }
 
@@ -248,13 +245,13 @@ export async function updateUser(
     }
 
     // Verificar se o usuário existe
-    const existingUser = await validateUserExists(id);
+    const existingUser = await validateUserExists(data.id);
     if (!existingUser) {
       return { success: false, message: MESSAGES.USERS.NOT_FOUND };
     }
 
     // Verificar se o email já existe em outro usuário
-    const emailExists = await validateEmailUniqueness(data.email.trim(), id);
+    const emailExists = await validateEmailUniqueness(data.email.trim(), data.id);
     if (!emailExists) {
       return { success: false, message: MESSAGES.USERS.EMAIL_EXISTS };
     }
@@ -262,7 +259,7 @@ export async function updateUser(
     // Atualizar usuário e roles em uma transação
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
-        where: { id },
+        where: { id: data.id },
         data: {
           name: data.name.trim(),
           email: data.email.trim(),
@@ -273,14 +270,11 @@ export async function updateUser(
 
       // Atualizar roles
       await tx.userRole.deleteMany({
-        where: { userId: id },
+        where: { userId: data.id },
       });
 
-      await tx.userRole.create({
-        data: {
-          userId: id,
-          roleId: data.roleId,
-        },
+      await tx.userRole.createMany({
+        data: data.roles.map((roleId) => ({ userId: data.id, roleId })),
       });
 
       return user;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { Meta, UseQueryOptions } from "@/types/generics";
-import { createRole, deleteRole, getRoles, updateRole } from "../server/roles";
+import { getRoles } from "../server/roles";
 
 export const USE_GET_ROLES_KEY = ["useGetRoles"];
 
@@ -34,39 +34,5 @@ export function useGetRoles(params?: {
       );
     },
     ...options,
-  });
-}
-
-export function useCreateRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createRole,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USE_GET_ROLES_KEY });
-    },
-  });
-}
-
-export function useUpdateRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      updateRole(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USE_GET_ROLES_KEY });
-    },
-  });
-}
-
-export function useDeleteRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: deleteRole,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USE_GET_ROLES_KEY });
-    },
   });
 }

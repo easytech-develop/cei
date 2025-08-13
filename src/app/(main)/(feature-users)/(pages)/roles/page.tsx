@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RolesPage() {
-  if (!(await can("role:read"))) {
-    redirect("/dashboard?error=no_permission");
-  }
+  // if (!(await can("role:read"))) {
+  //   redirect("/dashboard?error=no_permission");
+  // }
 
   return (
     <div className="space-y-6">

@@ -277,67 +277,58 @@ export function DataTable<TData, TValue>({
 				)}
 			</Table>
 			{meta && setMeta && meta.totalPages && meta.totalPages > 1 && (
-				<div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
-					<div className="text-sm text-muted-foreground">
-						{meta.total && (
-							<span>
-								{(meta.page - 1) * meta.limit + 1} - {Math.min(meta.page * meta.limit, meta.total)} de {meta.total}
-							</span>
-						)}
-					</div>
-					<Pagination>
-						<PaginationContent>
-							<PaginationItem>
-								<PaginationPrevious
-									href="#"
-									onClick={(e) => {
-										e.preventDefault();
-										if (meta.page > 1) {
-											setMeta({ page: meta.page - 1, limit: meta.limit });
-										}
-									}}
-									className={
-										meta.page <= 1 ? "pointer-events-none opacity-50" : ""
+				<Pagination>
+					<PaginationContent>
+						<PaginationItem>
+							<PaginationPrevious
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									if (meta.page > 1) {
+										setMeta({ page: meta.page - 1, limit: meta.limit });
 									}
-								/>
+								}}
+								className={
+									meta.page <= 1 ? "pointer-events-none opacity-50" : ""
+								}
+							/>
+						</PaginationItem>
+						{generatePageNumbers().map((page) => (
+							<PaginationItem key={`page-${page}`}>
+								{page === "ellipsis" ? (
+									<PaginationEllipsis />
+								) : (
+									<PaginationLink
+										href="#"
+										isActive={page === meta.page}
+										onClick={(e) => {
+											e.preventDefault();
+											setMeta({ page: page as number, limit: meta.limit });
+										}}
+									>
+										{page}
+									</PaginationLink>
+								)}
 							</PaginationItem>
-							{generatePageNumbers().map((page) => (
-								<PaginationItem key={`page-${page}`}>
-									{page === "ellipsis" ? (
-										<PaginationEllipsis />
-									) : (
-										<PaginationLink
-											href="#"
-											isActive={page === meta.page}
-											onClick={(e) => {
-												e.preventDefault();
-												setMeta({ page: page as number, limit: meta.limit });
-											}}
-										>
-											{page}
-										</PaginationLink>
-									)}
-								</PaginationItem>
-							))}
-							<PaginationItem>
-								<PaginationNext
-									href="#"
-									onClick={(e) => {
-										e.preventDefault();
-										if (meta.page < (meta.totalPages ?? 1)) {
-											setMeta({ page: meta.page + 1, limit: meta.limit });
-										}
-									}}
-									className={
-										meta.page >= (meta.totalPages ?? 1)
-											? "pointer-events-none opacity-50"
-											: ""
+						))}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									if (meta.page < (meta.totalPages ?? 1)) {
+										setMeta({ page: meta.page + 1, limit: meta.limit });
 									}
-								/>
-							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				</div>
+								}}
+								className={
+									meta.page >= (meta.totalPages ?? 1)
+										? "pointer-events-none opacity-50"
+										: ""
+								}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
 			)}
 		</div>
 	);

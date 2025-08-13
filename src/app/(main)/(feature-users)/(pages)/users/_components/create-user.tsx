@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { User } from "@prisma/client";
+import { Check, ChevronDownIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,6 +11,14 @@ import {
   createUserSchema,
 } from "@/app/(main)/(feature-users)/validators/users";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogClose,
@@ -29,13 +38,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  selectTriggerClass,
 } from "@/components/ui/select";
 import { queryClient } from "@/lib/queries/query-client";
+import { cn } from "@/lib/utils";
 import { useGetRoles } from "../../../queries/roles";
 import { USE_GET_USERS_KEY } from "../../../queries/users";
 import { createUser } from "../../../server/users";
@@ -57,7 +73,7 @@ export default function CreateUser({ trigger, onSuccess }: CreateUserProps) {
       email: "",
       password: "",
       status: "ACTIVE",
-      roleId: roles[0]?.id,
+      roles: [],
     },
     resolver: zodResolver(createUserSchema),
   });
@@ -76,13 +92,26 @@ export default function CreateUser({ trigger, onSuccess }: CreateUserProps) {
     setIsSubmitting(false);
   }
 
+  function handleChangeRole(roleId?: string) {
+    if (!roleId) {
+      form.setValue("roles", []);
+    } else if (form.getValues("roles").includes(roleId)) {
+      form.setValue(
+        "roles",
+        form.getValues("roles").filter((item) => item !== roleId),
+      );
+    } else {
+      form.setValue("roles", [...form.getValues("roles"), roleId]);
+    }
+  }
+
   useEffect(() => {
     if (open) form.reset();
   }, [open, form]);
 
   useEffect(() => {
-    if (roles.length > 0 && !form.getValues("roleId")) {
-      form.setValue("roleId", roles[0].id);
+    if (roles.length > 0 && !form.getValues("roles")) {
+      form.setValue("roles", [roles[0].id]);
     }
   }, [roles, form]);
 
@@ -163,28 +192,62 @@ export default function CreateUser({ trigger, onSuccess }: CreateUserProps) {
             />
             <FormField
               control={form.control}
-              name="roleId"
+              name="roles"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cargo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isLoadingRoles}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cargo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role.id} value={role.id}>
-                          {role.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <button type="button" className={selectTriggerClass}>Função <ChevronDownIcon className="size-4 opacity-50" /></button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar função..." />
+                        <CommandList>
+                          {isLoadingRoles && (
+                            <CommandItem
+                              className="flex items-center gap-2"
+                              disabled
+                            >
+                              <Loader2 className="w-4 h-4 animate-spin" />{" "}
+                              Carregando dados...
+                            </CommandItem>
+                          )}
+                          <CommandGroup>
+                            {roles.map((role) => (
+                              <CommandItem
+                                key={role.id}
+                                onSelect={() => {
+                                  handleChangeRole(role.id);
+                                }}
+                              >
+                                {role.name}
+                                <Check
+                                  className={cn(
+                                    "h-4 w-4",
+                                    field.value.includes(role.id)
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                        <CommandSeparator />
+                        <CommandGroup>
+                          <CommandItem
+                            className="flex justify-center"
+                            onSelect={() => handleChangeRole()}
+                          >
+                            Limpar filtro
+                          </CommandItem>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

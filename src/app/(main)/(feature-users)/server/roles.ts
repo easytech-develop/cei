@@ -143,13 +143,12 @@ export async function createRole(data: CreateRoleSchema): ActionResponse<{
 }
 
 export async function updateRole(
-  id: string,
   data: UpdateRoleSchema,
 ): ActionResponse<{
   role: Role;
 }> {
   try {
-    if (!id?.trim()) {
+    if (!data.id.trim()) {
       return { success: false, message: "ID do cargo é obrigatório" };
     }
 
@@ -161,18 +160,18 @@ export async function updateRole(
       return { success: false, message: MESSAGES.ROLES.SLUG_REQUIRED };
     }
 
-    const existingRole = await validateRoleExists(id);
+    const existingRole = await validateRoleExists(data.id);
     if (!existingRole) {
       return { success: false, message: MESSAGES.ROLES.NOT_FOUND };
     }
 
-    const slugExists = await validateSlugUniqueness(data.slug.trim(), id);
+    const slugExists = await validateSlugUniqueness(data.slug.trim(), data.id);
     if (!slugExists) {
       return { success: false, message: MESSAGES.ROLES.SLUG_EXISTS };
     }
 
     const role = await prisma.role.update({
-      where: { id },
+      where: { id: data.id },
       data: {
         name: data.name.trim(),
         slug: data.slug.trim().toUpperCase(),

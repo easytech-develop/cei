@@ -48,6 +48,7 @@ export default function UpdateRole({
 
   const form = useForm<UpdateRoleSchema>({
     defaultValues: {
+      id: role.id,
       name: role.name,
       slug: role.slug,
     },
@@ -56,7 +57,7 @@ export default function UpdateRole({
 
   async function onSubmit(data: UpdateRoleSchema) {
     setIsSubmitting(true);
-    const response = await updateRole(role.id, data);
+    const response = await updateRole(data);
     if (response.success && response.data?.role) {
       queryClient.invalidateQueries({ queryKey: USE_GET_ROLES_KEY });
       onSuccess?.(response.data.role);
@@ -71,6 +72,7 @@ export default function UpdateRole({
   useEffect(() => {
     if (open) {
       form.reset({
+        id: role.id,
         name: role.name,
         slug: role.slug,
       });

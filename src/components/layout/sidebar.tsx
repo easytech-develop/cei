@@ -280,7 +280,10 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                 className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 bg-sidebar border border-sidebar-border"
                 onClick={() => setIsCollapsed(false)}
               >
-                <ChevronLeft className="h-4 w-4 text-sidebar-foreground" />
+                <ChevronLeft className={cn(
+                  "h-4 w-4 text-sidebar-foreground transition-all duration-200",
+                  isCollapsed && "rotate-180"
+                )} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">Expandir Sidebar</TooltipContent>

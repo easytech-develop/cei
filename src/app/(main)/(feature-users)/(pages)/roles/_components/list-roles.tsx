@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Meta } from "@/types/generics";
 import { useGetRoles } from "../../../queries/roles";
 import DeleteRole from "./delete-role";
@@ -60,32 +61,49 @@ const columns: ColumnDef<Role>[] = [
 ];
 
 export default function ListRoles() {
+  const [filters, setFilters] = useState({
+    search: "",
+  });
   const [meta, setMeta] = useState<Meta>({
     page: 1,
     limit: 10,
   });
-  const { data, isLoading } = useGetRoles({ meta });
+  const { data, isLoading } = useGetRoles({ meta, filters });
 
   useEffect(() => {
     if (window) {
-      const storage = localStorage.getItem("list-roles-meta");
-      if (storage) {
-        setMeta(JSON.parse(storage));
+      const storageMeta = localStorage.getItem("list-roles-meta");
+      const storageFilters = localStorage.getItem("list-roles-filters");
+
+      if (storageMeta) {
+        setMeta(JSON.parse(storageMeta));
+      }
+
+      if (storageFilters) {
+        setFilters(JSON.parse(storageFilters));
       }
     }
   }, []);
 
   return (
-    <DataTable
-      columns={columns}
-      data={data?.roles ?? []}
-      loading={isLoading}
-      meta={{
-        ...meta,
-        total: data?.meta.total ?? 0,
-        totalPages: data?.meta.totalPages ?? 0,
-      }}
-      setMeta={setMeta}
-    />
+    <div className="space-y-4">
+      <Input
+        placeholder="Pesquisar"
+        value={filters.search}
+        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+        className="w-full lg:max-w-xs"
+      />
+      <DataTable
+        columns={columns}
+        data={data?.roles ?? []}
+        loading={isLoading}
+        meta={{
+          ...meta,
+          total: data?.meta.total ?? 0,
+          totalPages: data?.meta.totalPages ?? 0,
+        }}
+        setMeta={setMeta}
+      />
+    </div>
   );
 }
