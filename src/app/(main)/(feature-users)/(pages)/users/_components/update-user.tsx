@@ -195,7 +195,7 @@ export default function UpdateUser({
               name="roles"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cargo</FormLabel>
+                  <FormLabel>Função</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>

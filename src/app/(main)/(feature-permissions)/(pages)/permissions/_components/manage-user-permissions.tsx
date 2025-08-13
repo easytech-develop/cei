@@ -185,7 +185,7 @@ export default function ManageUserPermissions({
             Gerencie as permissões do usuário "{user.name}" ({user.email})
             <br />
             <span className="text-xs text-muted-foreground">
-              Permissões de usuário sobrescrevem as permissões dos cargos
+              Permissões de usuário sobrescrevem as permissões dos funções
             </span>
           </DialogDescription>
         </DialogHeader>

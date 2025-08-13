@@ -1,6 +1,6 @@
 # Feature de Usuários
 
-Esta documentação descreve a feature de gerenciamento de usuários do sistema, incluindo usuários e cargos (roles).
+Esta documentação descreve a feature de gerenciamento de usuários do sistema, incluindo usuários e funções (roles).
 
 ## 📋 Índice
 
@@ -15,16 +15,16 @@ Esta documentação descreve a feature de gerenciamento de usuários do sistema,
 
 ## 🎯 Visão Geral
 
-A feature de usuários permite o gerenciamento completo de usuários e cargos do sistema, incluindo:
+A feature de usuários permite o gerenciamento completo de usuários e funções do sistema, incluindo:
 
 - **CRUD de Usuários**: Criar, listar, atualizar e excluir usuários
-- **CRUD de Cargos**: Criar, listar, atualizar e excluir cargos
-- **Gerenciamento de Cargos**: Associar usuários a múltiplos cargos específicos
+- **CRUD de Funções**: Criar, listar, atualizar e excluir funções
+- **Gerenciamento de Funções**: Associar usuários a múltiplos funções específicos
 - **Controle de Status**: Ativar/suspender usuários
 - **Soft Delete**: Exclusão lógica com possibilidade de restauração
 - **Validações**: Validação de dados e regras de negócio
 - **Interface Responsiva**: Interface moderna com tabela de dados
-- **Seleção Múltipla de Roles**: Interface avançada com popover e command para seleção de cargos
+- **Seleção Múltipla de Roles**: Interface avançada com popover e command para seleção de funções
 
 ## 🗄️ Tabelas do Schema
 
@@ -65,7 +65,7 @@ model User {
 - `image`: URL da imagem do usuário (NextAuth)
 
 ### Role
-Tabela de cargos/funções do sistema.
+Tabela de funções/funções do sistema.
 
 ```prisma
 model Role {
@@ -81,14 +81,14 @@ model Role {
 ```
 
 **Campos:**
-- `id`: Identificador único do cargo (UUID v7)
-- `slug`: Slug único do cargo (ex: "ADMIN", "DIRECTOR")
-- `name`: Nome descritivo do cargo
+- `id`: Identificador único do função (UUID v7)
+- `slug`: Slug único do função (ex: "ADMIN", "DIRECTOR")
+- `name`: Nome descritivo do função
 - `createdAt`: Data de criação
 - `updatedAt`: Data da última atualização
 
 ### UserRole
-Tabela de relacionamento entre usuários e cargos (N:N).
+Tabela de relacionamento entre usuários e funções (N:N).
 
 ```prisma
 model UserRole {
@@ -107,15 +107,15 @@ model UserRole {
 
 **Campos:**
 - `userId`: ID do usuário
-- `roleId`: ID do cargo
+- `roleId`: ID do função
 - `createdAt`: Data de criação da associação
 - `updatedAt`: Data da última atualização
 - `deletedAt`: Data de exclusão da associação (soft delete)
 
 **Relacionamentos:**
-- Um usuário pode ter múltiplos cargos
-- Um cargo pode ser atribuído a múltiplos usuários
-- Exclusão em cascata quando usuário ou cargo é removido
+- Um usuário pode ter múltiplos funções
+- Um função pode ser atribuído a múltiplos usuários
+- Exclusão em cascata quando usuário ou função é removido
 
 ## 📁 Estrutura de Arquivos
 
@@ -133,7 +133,7 @@ src/app/(main)/(feature-users)/
 │   └── users.ts                # Tipos TypeScript
 ├── queries/
 │   ├── users.ts                # Hooks React Query para usuários
-│   └── roles.ts                # Hooks React Query para cargos
+│   └── roles.ts                # Hooks React Query para funções
 ├── server/
 │   └── users.ts                # Funções server-side (APIs)
 └── validators/
@@ -145,7 +145,7 @@ src/app/(main)/(feature-users)/
 ### 1. Listagem de Usuários
 - **Paginação**: Suporte a paginação com limite configurável
 - **Busca**: Busca por nome e email
-- **Filtros**: Filtro por cargos específicos com seleção múltipla
+- **Filtros**: Filtro por funções específicos com seleção múltipla
 - **Ordenação**: Ordenação por data de criação e nome
 - **Status**: Exibe apenas usuários ativos (não deletados)
 - **Exibição de Roles**: Mostra no máximo 2 roles por usuário com indicador "+X" para roles adicionais
@@ -155,13 +155,13 @@ src/app/(main)/(feature-users)/
 - **Email Único**: Verificação de email duplicado
 - **Restauração**: Restaura usuário deletado se email existir
 - **Hash de Senha**: Senha criptografada com bcrypt
-- **Seleção Múltipla de Roles**: Interface com popover e command para seleção de múltiplos cargos
-- **Validação de Roles**: Pelo menos um cargo é obrigatório
+- **Seleção Múltipla de Roles**: Interface com popover e command para seleção de múltiplos funções
+- **Validação de Roles**: Pelo menos um função é obrigatório
 
 ### 3. Atualização de Usuário
 - **Validações**: Validação de dados de entrada
 - **Email Único**: Verificação de email duplicado (exceto próprio)
-- **Transação**: Atualização atômica de usuário e cargos
+- **Transação**: Atualização atômica de usuário e funções
 - **Seleção Múltipla de Roles**: Interface consistente com criação
 - **Auditoria**: Registro de alterações
 
@@ -170,20 +170,20 @@ src/app/(main)/(feature-users)/
 - **Validação**: Verifica se usuário existe e não está deletado
 - **Auditoria**: Registro da exclusão
 
-### 5. Gerenciamento de Cargos
-- **Listagem**: Lista todos os cargos disponíveis
-- **Associação Múltipla**: Associa usuários a múltiplos cargos específicos
-- **Validação**: Verifica se cargo existe
+### 5. Gerenciamento de Funções
+- **Listagem**: Lista todos os funções disponíveis
+- **Associação Múltipla**: Associa usuários a múltiplos funções específicos
+- **Validação**: Verifica se função existe
 - **Interface Avançada**: Popover com command para melhor UX
 
-### 6. CRUD de Cargos
-- **Listagem de Cargos**: Lista cargos com paginação e busca
-- **Criação de Cargo**: Cria novos cargos com validação de slug único
-- **Atualização de Cargo**: Atualiza informações de cargos existentes
-- **Exclusão de Cargo**: Exclui cargos (apenas se não houver usuários associados)
+### 6. CRUD de Funções
+- **Listagem de Funções**: Lista funções com paginação e busca
+- **Criação de Função**: Cria novos funções com validação de slug único
+- **Atualização de Função**: Atualiza informações de funções existentes
+- **Exclusão de Função**: Exclui funções (apenas se não houver usuários associados)
 - **Validações**: Validação de nome e slug obrigatórios
 - **Slug Único**: Verificação de slug duplicado
-- **Proteção**: Impede exclusão de cargos com usuários associados
+- **Proteção**: Impede exclusão de funções com usuários associados
 
 ## 🔌 APIs
 
@@ -245,7 +245,7 @@ deleteUser(id: string)
 ```
 
 ### getRoles
-Lista cargos com paginação e filtros.
+Lista funções com paginação e filtros.
 
 ```typescript
 getRoles({
@@ -269,7 +269,7 @@ getRoles({
 ```
 
 ### createRole
-Cria um novo cargo.
+Cria um novo função.
 
 ```typescript
 createRole({
@@ -279,7 +279,7 @@ createRole({
 ```
 
 ### updateRole
-Atualiza um cargo existente.
+Atualiza um função existente.
 
 ```typescript
 updateRole(id: string, {
@@ -289,7 +289,7 @@ updateRole(id: string, {
 ```
 
 ### deleteRole
-Exclui um cargo (apenas se não houver usuários associados).
+Exclui um função (apenas se não houver usuários associados).
 
 ```typescript
 deleteRole(id: string)
@@ -303,7 +303,7 @@ Tabela responsiva com listagem de usuários.
 **Funcionalidades:**
 - Paginação automática
 - Busca em tempo real
-- Filtros por cargo com seleção múltipla
+- Filtros por função com seleção múltipla
 - Ações de edição e exclusão
 - Persistência de estado no localStorage
 - **Exibição limitada de roles**: Máximo 2 roles visíveis com indicador "+X"
@@ -348,7 +348,7 @@ Modal de confirmação para exclusão.
 - Feedback visual
 
 ### ListRoles
-Tabela responsiva com listagem de cargos.
+Tabela responsiva com listagem de funções.
 
 **Funcionalidades:**
 - Paginação automática
@@ -357,21 +357,21 @@ Tabela responsiva com listagem de cargos.
 - Persistência de estado no localStorage
 
 ### CreateRole
-Modal para criação de cargos.
+Modal para criação de funções.
 
 **Campos:**
 - Nome (obrigatório)
 - Slug (obrigatório, único, convertido para maiúsculas)
 
 ### UpdateRole
-Modal para edição de cargos.
+Modal para edição de funções.
 
 **Campos:**
 - Nome (obrigatório)
 - Slug (obrigatório, único, convertido para maiúsculas)
 
 ### DeleteRole
-Modal de confirmação para exclusão de cargos.
+Modal de confirmação para exclusão de funções.
 
 **Funcionalidades:**
 - Confirmação antes da exclusão
@@ -418,10 +418,10 @@ Modal de confirmação para exclusão de cargos.
 - **Pelo menos um role é obrigatório**
 - Nome e email são obrigatórios
 - Validação de usuário existente antes de operações
-- Slug de cargo deve ser único
-- Nome de cargo é obrigatório
-- Validação de cargo existente antes de operações
-- Proteção contra exclusão de cargos com usuários associados
+- Slug de função deve ser único
+- Nome de função é obrigatório
+- Validação de função existente antes de operações
+- Proteção contra exclusão de funções com usuários associados
 
 ### Validações Server-Side
 - Verificação de email duplicado
@@ -429,7 +429,7 @@ Modal de confirmação para exclusão de cargos.
 - Verificação de soft delete
 - Transações para operações complexas
 - Verificação de slug duplicado
-- Validação de cargo existente
+- Validação de função existente
 - Verificação de usuários associados antes da exclusão
 - **Validação de array de roles não vazio**
 
@@ -442,10 +442,10 @@ A feature de usuários utiliza o sistema de permissões do NextAuth:
 - `user:create` - Criar usuários
 - `user:update` - Atualizar usuários
 - `user:delete` - Excluir usuários
-- `role:read` - Visualizar cargos
-- `role:create` - Criar cargos
-- `role:update` - Atualizar cargos
-- `role:delete` - Excluir cargos
+- `role:read` - Visualizar funções
+- `role:create` - Criar funções
+- `role:update` - Atualizar funções
+- `role:delete` - Excluir funções
 
 ### Verificação de Permissões
 ```typescript
@@ -462,19 +462,19 @@ Navegue para `/users` (requer permissão `user:read`)
 ### 2. Listar Usuários
 - A tabela carrega automaticamente
 - Use a busca para filtrar por nome/email
-- Use os filtros de cargo para refinar resultados (seleção múltipla)
+- Use os filtros de função para refinar resultados (seleção múltipla)
 - **Roles são exibidos com limite de 2 visíveis + indicador de quantidade**
 
 ### 3. Criar Usuário
 - Clique no botão "+" no canto superior direito
 - Preencha todos os campos obrigatórios
-- **Selecione um ou mais cargos usando o popover de seleção**
+- **Selecione um ou mais funções usando o popover de seleção**
 - Clique em "Criar"
 
 ### 4. Editar Usuário
 - Clique no ícone de edição na linha do usuário
 - Modifique os campos desejados
-- **Gerencie os cargos usando a interface de seleção múltipla**
+- **Gerencie os funções usando a interface de seleção múltipla**
 - Clique em "Salvar"
 
 ### 5. Excluir Usuário
@@ -482,28 +482,28 @@ Navegue para `/users` (requer permissão `user:read`)
 - Confirme a exclusão no modal
 - O usuário será marcado como deletado
 
-### 6. Gerenciar Cargos
+### 6. Gerenciar Funções
 Navegue para `/roles` (requer permissão `role:read`)
 
-#### Listar Cargos
+#### Listar Funções
 - A tabela carrega automaticamente
 - Use a busca para filtrar por nome/slug
 
-#### Criar Cargo
+#### Criar Função
 - Clique no botão "+" no canto superior direito
 - Preencha nome e slug (obrigatórios)
 - O slug será convertido automaticamente para maiúsculas
 - Clique em "Criar"
 
-#### Editar Cargo
-- Clique no ícone de edição na linha do cargo
+#### Editar Função
+- Clique no ícone de edição na linha do função
 - Modifique os campos desejados
 - Clique em "Salvar"
 
-#### Excluir Cargo
-- Clique no ícone de lixeira na linha do cargo
+#### Excluir Função
+- Clique no ícone de lixeira na linha do função
 - Confirme a exclusão no modal
-- O cargo será excluído (apenas se não houver usuários associados)
+- O função será excluído (apenas se não houver usuários associados)
 
 ## 🔧 Configurações
 

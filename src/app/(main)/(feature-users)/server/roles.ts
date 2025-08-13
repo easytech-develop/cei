@@ -11,18 +11,18 @@ import type { ActionResponse, Meta } from "@/types/generics";
 
 const MESSAGES = {
   ROLES: {
-    LISTED_SUCCESS: "Cargos listados com sucesso",
-    LIST_ERROR: "Erro ao listar cargos",
-    CREATED_SUCCESS: "Cargo criado com sucesso",
-    CREATED_ERROR: "Erro ao criar cargo",
-    UPDATED_SUCCESS: "Cargo atualizado com sucesso",
-    UPDATED_ERROR: "Erro ao atualizar cargo",
-    DELETED_SUCCESS: "Cargo excluído com sucesso",
-    DELETED_ERROR: "Erro ao excluir cargo",
-    NOT_FOUND: "Cargo não encontrado",
-    SLUG_EXISTS: "Já existe um cargo com este slug",
-    NAME_REQUIRED: "Nome do cargo é obrigatório",
-    SLUG_REQUIRED: "Slug do cargo é obrigatório",
+    LISTED_SUCCESS: "Funções listados com sucesso",
+    LIST_ERROR: "Erro ao listar funções",
+    CREATED_SUCCESS: "Função criado com sucesso",
+    CREATED_ERROR: "Erro ao criar função",
+    UPDATED_SUCCESS: "Função atualizado com sucesso",
+    UPDATED_ERROR: "Erro ao atualizar função",
+    DELETED_SUCCESS: "Função excluído com sucesso",
+    DELETED_ERROR: "Erro ao excluir função",
+    NOT_FOUND: "Função não encontrado",
+    SLUG_EXISTS: "Já existe um função com este slug",
+    NAME_REQUIRED: "Nome do função é obrigatório",
+    SLUG_REQUIRED: "Slug do função é obrigatório",
   },
 } as const;
 
@@ -149,7 +149,7 @@ export async function updateRole(
 }> {
   try {
     if (!data.id.trim()) {
-      return { success: false, message: "ID do cargo é obrigatório" };
+      return { success: false, message: "ID do função é obrigatório" };
     }
 
     if (!data.name?.trim()) {
@@ -195,7 +195,7 @@ export async function deleteRole(id: string): ActionResponse<{
 }> {
   try {
     if (!id?.trim()) {
-      return { success: false, message: "ID do cargo é obrigatório" };
+      return { success: false, message: "ID do função é obrigatório" };
     }
 
     const existingRole = await validateRoleExists(id);
@@ -203,7 +203,7 @@ export async function deleteRole(id: string): ActionResponse<{
       return { success: false, message: MESSAGES.ROLES.NOT_FOUND };
     }
 
-    // Verificar se há usuários associados a este cargo
+    // Verificar se há usuários associados a este função
     const usersWithRole = await prisma.userRole.count({
       where: { roleId: id },
     });
@@ -211,7 +211,7 @@ export async function deleteRole(id: string): ActionResponse<{
     if (usersWithRole > 0) {
       return {
         success: false,
-        message: `Não é possível excluir o cargo. Existem ${usersWithRole} usuário(s) associado(s) a este cargo.`,
+        message: `Não é possível excluir o função. Existem ${usersWithRole} usuário(s) associado(s) a este função.`,
       };
     }
 

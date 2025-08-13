@@ -144,10 +144,10 @@ export default function ManageRolePermissions({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Gerenciar permissões do cargo
+            Gerenciar permissões do função
           </DialogTitle>
           <DialogDescription>
-            Gerencie as permissões do cargo "{role.name}" ({role.slug})
+            Gerencie as permissões do função "{role.name}" ({role.slug})
           </DialogDescription>
         </DialogHeader>
 

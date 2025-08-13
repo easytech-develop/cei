@@ -1,6 +1,6 @@
 # Feature de Permissões
 
-Esta documentação descreve a feature de gerenciamento de permissões do sistema, incluindo permissões e sua integração com cargos e usuários.
+Esta documentação descreve a feature de gerenciamento de permissões do sistema, incluindo permissões e sua integração com funções e usuários.
 
 ## 📋 Índice
 
@@ -18,12 +18,12 @@ Esta documentação descreve a feature de gerenciamento de permissões do sistem
 A feature de permissões permite o gerenciamento completo de permissões do sistema, incluindo:
 
 - **CRUD de Permissões**: Criar, listar, atualizar e excluir permissões
-- **Gerenciamento de Permissões de Cargos**: Associar permissões a cargos específicos
+- **Gerenciamento de Permissões de Funções**: Associar permissões a funções específicos
 - **Gerenciamento de Permissões de Usuários**: Configurar permissões individuais de usuários (GRANT/DENY)
 - **Sistema de Códigos Únicos**: Cada permissão tem um código único no formato `recurso:ação`
 - **Interface Avançada**: Interface moderna com agrupamento por recurso e busca
 - **Validações**: Validação de dados e regras de negócio
-- **Integração Completa**: Integração com as features de usuários e cargos
+- **Integração Completa**: Integração com as features de usuários e funções
 
 ## 🗄️ Tabelas do Schema
 
@@ -57,7 +57,7 @@ model Permission {
 - `updatedAt`: Data da última atualização
 
 ### RolePermission
-Tabela de relacionamento entre cargos e permissões (N:N).
+Tabela de relacionamento entre funções e permissões (N:N).
 
 ```prisma
 model RolePermission {
@@ -74,7 +74,7 @@ model RolePermission {
 ```
 
 **Campos:**
-- `roleId`: ID do cargo
+- `roleId`: ID do função
 - `permissionId`: ID da permissão
 - `createdAt`: Data de criação da associação
 - `updatedAt`: Data da última atualização
@@ -120,7 +120,7 @@ src/app/(main)/(feature-permissions)/
 │       ├── delete-permission.tsx     # Modal de exclusão
 │       ├── list-permissions.tsx      # Tabela de permissões
 │       ├── update-permission.tsx     # Modal de edição
-│       ├── manage-role-permissions.tsx    # Gerenciar permissões de cargo
+│       ├── manage-role-permissions.tsx    # Gerenciar permissões de função
 │       └── manage-user-permissions.tsx    # Gerenciar permissões de usuário
 ├── types/
 │   └── permissions.ts          # Tipos TypeScript
@@ -156,10 +156,10 @@ src/app/(main)/(feature-permissions)/
 ### 4. Exclusão de Permissão
 - **Soft Delete**: Exclusão lógica (marca deletedAt)
 - **Validação**: Verifica se permissão existe e não está deletada
-- **Proteção**: Impede exclusão se há cargos ou usuários associados
+- **Proteção**: Impede exclusão se há funções ou usuários associados
 - **Auditoria**: Registro da exclusão
 
-### 5. Gerenciamento de Permissões de Cargos
+### 5. Gerenciamento de Permissões de Funções
 - **Interface Avançada**: Modal com agrupamento por recurso
 - **Busca em Tempo Real**: Busca por nome, descrição, recurso e ação
 - **Seleção Múltipla**: Checkboxes para seleção de permissões
@@ -169,7 +169,7 @@ src/app/(main)/(feature-permissions)/
 
 ### 6. Gerenciamento de Permissões de Usuários
 - **Modo GRANT/DENY**: Permissões podem ser concedidas ou negadas
-- **Sobrescrita**: Permissões de usuário sobrescrevem as de cargos
+- **Sobrescrita**: Permissões de usuário sobrescrevem as de funções
 - **Interface Dual**: Checkboxes separados para conceder e negar
 - **Busca Avançada**: Busca por nome, descrição, recurso e ação
 - **Controles Rápidos**: Botões para conceder/negar todas
@@ -230,14 +230,14 @@ updatePermission({
 ```
 
 ### deletePermission
-Exclui uma permissão (apenas se não houver cargos ou usuários associados).
+Exclui uma permissão (apenas se não houver funções ou usuários associados).
 
 ```typescript
 deletePermission(id: string)
 ```
 
 ### getRolePermissions
-Obtém permissões de um cargo específico.
+Obtém permissões de um função específico.
 
 ```typescript
 getRolePermissions(roleId: string)
@@ -256,7 +256,7 @@ getRolePermissions(roleId: string)
 ```
 
 ### updateRolePermissions
-Atualiza permissões de um cargo.
+Atualiza permissões de um função.
 
 ```typescript
 updateRolePermissions({
@@ -344,7 +344,7 @@ Modal de confirmação para exclusão.
 - Feedback visual
 
 ### ManageRolePermissions
-Modal avançado para gerenciar permissões de cargos.
+Modal avançado para gerenciar permissões de funções.
 
 **Funcionalidades:**
 - Interface com agrupamento por recurso
@@ -416,30 +416,30 @@ Modal avançado para gerenciar permissões de usuários.
 - Código da permissão deve ser único (formato: `recurso:ação`)
 - Recurso e ação são obrigatórios
 - Validação de permissão existente antes de operações
-- Proteção contra exclusão de permissões com cargos ou usuários associados
+- Proteção contra exclusão de permissões com funções ou usuários associados
 - Transações para operações complexas
-- Validação de cargos e usuários existentes
+- Validação de funções e usuários existentes
 
 ## 🔗 Integração com Roles e Users
 
-### Integração com Cargos
-- **Botão de Gerenciamento**: Adicionado botão de escudo na tabela de cargos
-- **Modal Integrado**: `ManageRolePermissions` integrado na listagem de cargos
+### Integração com Funções
+- **Botão de Gerenciamento**: Adicionado botão de escudo na tabela de funções
+- **Modal Integrado**: `ManageRolePermissions` integrado na listagem de funções
 - **Atualização Automática**: Cache invalido automaticamente após alterações
 - **Feedback Visual**: Toast notifications para sucesso/erro
 
 ### Integração com Usuários
 - **Botão de Gerenciamento**: Adicionado botão de usuário na tabela de usuários
 - **Modal Integrado**: `ManageUserPermissions` integrado na listagem de usuários
-- **Lógica de Sobrescrita**: Permissões de usuário sobrescrevem as de cargos
+- **Lógica de Sobrescrita**: Permissões de usuário sobrescrevem as de funções
 - **Modo Dual**: Interface para conceder ou negar permissões
 - **Atualização Automática**: Cache invalido automaticamente após alterações
 
 ### Fluxo de Permissões
-1. **Permissões de Cargo**: Cargos têm permissões associadas
+1. **Permissões de Função**: Funções têm permissões associadas
 2. **Permissões de Usuário**: Usuários podem ter permissões específicas
-3. **Sobrescrita**: Permissões de usuário têm prioridade sobre as de cargo
-4. **Modo DENY**: Permissões negadas bloqueiam acesso mesmo se concedidas por cargo
+3. **Sobrescrita**: Permissões de usuário têm prioridade sobre as de função
+4. **Modo DENY**: Permissões negadas bloqueiam acesso mesmo se concedidas por função
 5. **Modo GRANT**: Permissões concedidas garantem acesso
 
 ## 🚀 Como Usar
@@ -468,7 +468,7 @@ Navegue para `/permissions` (requer permissão `permission:read`)
 - Confirme a exclusão no modal
 - A permissão será excluída (apenas se não houver dependências)
 
-### 6. Gerenciar Permissões de Cargos
+### 6. Gerenciar Permissões de Funções
 Navegue para `/roles` e clique no ícone de escudo
 
 #### Interface de Gerenciamento
@@ -534,7 +534,7 @@ DATABASE_URL="postgresql://..."
 - Controles rápidos para operações em massa
 
 ### Integração
-- Integração completa com features de usuários e cargos
+- Integração completa com features de usuários e funções
 - Cache invalido automaticamente
 - Componentes reutilizáveis
 - Interface consistente em todo o sistema

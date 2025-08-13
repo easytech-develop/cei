@@ -107,7 +107,7 @@ export function useDeletePermission() {
   });
 }
 
-// Hook para obter permissões de um cargo
+// Hook para obter permissões de um função
 export function useGetRolePermissions(roleId: string) {
   return useQuery({
     queryKey: USE_GET_ROLE_PERMISSIONS_KEY(roleId),
@@ -117,7 +117,7 @@ export function useGetRolePermissions(roleId: string) {
   });
 }
 
-// Hook para atualizar permissões de um cargo
+// Hook para atualizar permissões de um função
 export function useUpdateRolePermissions() {
   const queryClient = useQueryClient();
 
@@ -129,7 +129,7 @@ export function useUpdateRolePermissions() {
         queryClient.invalidateQueries({
           queryKey: USE_GET_ROLE_PERMISSIONS_KEY(variables.roleId),
         });
-        // Invalida também a lista de cargos para atualizar contadores
+        // Invalida também a lista de funções para atualizar contadores
         queryClient.invalidateQueries({ queryKey: ["roles", "list"] });
         toast.success(response.message);
       } else {
@@ -137,8 +137,8 @@ export function useUpdateRolePermissions() {
       }
     },
     onError: (error) => {
-      console.error("Erro ao atualizar permissões do cargo:", error);
-      toast.error("Erro interno ao atualizar permissões do cargo");
+      console.error("Erro ao atualizar permissões do função:", error);
+      toast.error("Erro interno ao atualizar permissões do função");
     },
   });
 }

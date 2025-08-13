@@ -28,9 +28,9 @@ const MESSAGES = {
     ACTION_REQUIRED: "Ação é obrigatória",
   },
   ROLE_PERMISSIONS: {
-    UPDATED_SUCCESS: "Permissões do cargo atualizadas com sucesso",
-    UPDATED_ERROR: "Erro ao atualizar permissões do cargo",
-    ROLE_NOT_FOUND: "Cargo não encontrado",
+    UPDATED_SUCCESS: "Permissões do função atualizadas com sucesso",
+    UPDATED_ERROR: "Erro ao atualizar permissões do função",
+    ROLE_NOT_FOUND: "Função não encontrado",
   },
   USER_PERMISSIONS: {
     UPDATED_SUCCESS: "Permissões do usuário atualizadas com sucesso",
@@ -272,7 +272,7 @@ export async function deletePermission(id: string): ActionResponse<{
     if (rolesWithPermission > 0 || usersWithPermission > 0) {
       return {
         success: false,
-        message: `Não é possível excluir a permissão. Existem ${rolesWithPermission} cargo(s) e ${usersWithPermission} usuário(s) associado(s) a esta permissão.`,
+        message: `Não é possível excluir a permissão. Existem ${rolesWithPermission} função(s) e ${usersWithPermission} usuário(s) associado(s) a esta permissão.`,
       };
     }
 
@@ -297,7 +297,7 @@ export async function getRolePermissions(roleId: string): ActionResponse<{
 }> {
   try {
     if (!roleId?.trim()) {
-      return { success: false, message: "ID do cargo é obrigatório" };
+      return { success: false, message: "ID do função é obrigatório" };
     }
 
     const [role, allPermissions] = await Promise.all([
@@ -329,7 +329,7 @@ export async function getRolePermissions(roleId: string): ActionResponse<{
 
     return {
       success: true,
-      message: "Permissões do cargo carregadas com sucesso",
+      message: "Permissões do função carregadas com sucesso",
       data: {
         permissions: allPermissions,
         assignedPermissionIds,
@@ -337,7 +337,7 @@ export async function getRolePermissions(roleId: string): ActionResponse<{
     };
   } catch (error) {
     logError({ error, where: "getRolePermissions" });
-    return { success: false, message: "Erro ao carregar permissões do cargo" };
+    return { success: false, message: "Erro ao carregar permissões do função" };
   }
 }
 
@@ -349,7 +349,7 @@ export async function updateRolePermissions(
 }> {
   try {
     if (!data.roleId?.trim()) {
-      return { success: false, message: "ID do cargo é obrigatório" };
+      return { success: false, message: "ID do função é obrigatório" };
     }
 
     const role = await prisma.role.findUnique({
@@ -377,7 +377,7 @@ export async function updateRolePermissions(
       };
     }
 
-    // Atualizar permissões do cargo em uma transação
+    // Atualizar permissões do função em uma transação
     await prisma.$transaction(async (tx) => {
       // Remover todas as permissões atuais
       await tx.rolePermission.deleteMany({

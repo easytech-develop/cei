@@ -22,7 +22,7 @@ const MESSAGES = {
     DELETED_ERROR: "Erro ao excluir usuário",
     NOT_FOUND: "Usuário não encontrado",
     EMAIL_EXISTS: "Já existe um usuário com este email",
-    ROLE_REQUIRED: "Informe o cargo",
+    ROLE_REQUIRED: "Informe o função",
   },
 } as const;
 

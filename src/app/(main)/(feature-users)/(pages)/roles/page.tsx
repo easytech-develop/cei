@@ -7,8 +7,8 @@ import CreateRole from "./_components/create-role";
 import ListRoles from "./_components/list-roles";
 
 export const metadata: Metadata = {
-  title: "Cargos",
-  description: "Gerencie os cargos e funções do sistema.",
+  title: "Funções",
+  description: "Gerencie os funções e funções do sistema.",
 };
 
 export default async function RolesPage() {
@@ -20,9 +20,9 @@ export default async function RolesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cargos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Funções</h1>
           <p className="text-muted-foreground">
-            Gerencie os cargos e funções do sistema.
+            Gerencie os funções e funções do sistema.
           </p>
         </div>
         <CreateRole

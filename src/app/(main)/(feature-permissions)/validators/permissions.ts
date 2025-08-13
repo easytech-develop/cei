@@ -42,7 +42,7 @@ export const listPermissionsSchema = z.object({
 
 // Schema para gerenciar permissões de role
 export const manageRolePermissionsSchema = z.object({
-  roleId: z.string().nonempty("ID do cargo é obrigatório"),
+  roleId: z.string().nonempty("ID do função é obrigatório"),
   permissionIds: z.array(z.string()).min(1, "Pelo menos uma permissão é obrigatória"),
 });
 

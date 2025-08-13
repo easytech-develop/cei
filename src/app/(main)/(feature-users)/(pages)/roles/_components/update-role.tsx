@@ -84,9 +84,9 @@ export default function UpdateRole({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Atualizar cargo</DialogTitle>
+          <DialogTitle>Atualizar função</DialogTitle>
           <DialogDescription>
-            Atualize as informações do cargo selecionado.
+            Atualize as informações do função selecionado.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -130,7 +130,7 @@ export default function UpdateRole({
                 </Button>
               </DialogClose>
               <Button type="submit" loading={isSubmitting}>
-                Atualizar cargo
+                Atualizar função
               </Button>
             </div>
           </form>

@@ -45,12 +45,12 @@ export default function DeleteRole({ trigger, role }: DeleteRoleProps) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Excluir cargo</DialogTitle>
+          <DialogTitle>Excluir função</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir o cargo {role.name} ({role.slug})?
+            Tem certeza que deseja excluir o função {role.name} ({role.slug})?
             <br />
             <br />
-            <strong>Atenção:</strong> Esta ação não pode ser desfeita e só será possível se não houver usuários associados a este cargo.
+            <strong>Atenção:</strong> Esta ação não pode ser desfeita e só será possível se não houver usuários associados a este função.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

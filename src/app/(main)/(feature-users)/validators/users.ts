@@ -6,7 +6,7 @@ export const createUserSchema = z.object({
   email: z.string().email("Informe um email válido"),
   password: z.string().min(6, "Senha deve ter pelo menos 8 caracteres"),
   status: z.enum(["ACTIVE", "SUSPENDED"]),
-  roles: z.array(z.string()).nonempty("Informe pelo menos um cargo"),
+  roles: z.array(z.string()).nonempty("Informe pelo menos um função"),
 })
 
 // Schema para atualização de usuário
@@ -15,7 +15,7 @@ export const updateUserSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(255, "Nome muito longo"),
   email: z.string().email("Email inválido").max(255, "Email muito longo"),
   status: z.enum(["ACTIVE", "SUSPENDED"]),
-  roles: z.array(z.string()).nonempty("Informe pelo menos um cargo"),
+  roles: z.array(z.string()).nonempty("Informe pelo menos um função"),
 })
 
 // Schema para alteração de senha

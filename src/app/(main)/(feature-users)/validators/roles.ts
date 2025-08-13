@@ -1,19 +1,19 @@
 import { z } from "zod"
 
-// Schema para criação de cargo
+// Schema para criação de função
 export const createRoleSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(255, "Nome muito longo"),
   slug: z.string().min(1, "Slug é obrigatório").max(50, "Slug muito longo"),
 })
 
-// Schema para atualização de cargo
+// Schema para atualização de função
 export const updateRoleSchema = z.object({
   id: z.string().nonempty("ID é obrigatório"),
   name: z.string().min(1, "Nome é obrigatório").max(255, "Nome muito longo"),
   slug: z.string().min(1, "Slug é obrigatório").max(50, "Slug muito longo"),
 })
 
-// Schema para resposta de cargo
+// Schema para resposta de função
 export const roleResponseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -22,7 +22,7 @@ export const roleResponseSchema = z.object({
   updatedAt: z.date(),
 })
 
-// Schema para listagem de cargos
+// Schema para listagem de funções
 export const listRolesSchema = z.object({
   page: z.number().min(1).default(1),
   limit: z.number().min(1).max(100).default(10),

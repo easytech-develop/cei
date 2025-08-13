@@ -1,8 +1,16 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Check, CircleFadingPlus, Edit, Loader2, Trash2, User } from "lucide-react";
+import {
+  Check,
+  CircleFadingPlus,
+  Edit,
+  Loader2,
+  Trash2,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import ManageUserPermissions from "@/app/(main)/(feature-permissions)/(pages)/permissions/_components/manage-user-permissions";
 import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +36,6 @@ import { useGetUsers } from "../../../queries/users";
 import type { UserWithRoles } from "../../../types/users";
 import DeleteUser from "./delete-user";
 import UpdateUser from "./update-user";
-import ManageUserPermissions from "@/app/(main)/(feature-permissions)/(pages)/permissions/_components/manage-user-permissions";
 
 const columns: ColumnDef<UserWithRoles>[] = [
   {
@@ -41,7 +48,7 @@ const columns: ColumnDef<UserWithRoles>[] = [
   },
   {
     accessorKey: "roles",
-    header: "Cargo",
+    header: "Função",
     cell: ({ row }) => {
       const roles = row.original.roles;
       const displayRoles = roles.slice(0, 2);
@@ -55,9 +62,7 @@ const columns: ColumnDef<UserWithRoles>[] = [
             </Badge>
           ))}
           {remainingCount > 0 && (
-            <Badge variant="secondary">
-              +{remainingCount}
-            </Badge>
+            <Badge variant="secondary">+{remainingCount}</Badge>
           )}
         </div>
       );
@@ -115,7 +120,10 @@ export default function ListUsers() {
     if (!roleId) {
       setFilters({ ...filters, roles: [] });
     } else if (filters.roles.includes(roleId)) {
-      setFilters({ ...filters, roles: filters.roles.filter((item) => item !== roleId) });
+      setFilters({
+        ...filters,
+        roles: filters.roles.filter((item) => item !== roleId),
+      });
     } else {
       setFilters({ ...filters, roles: [...filters.roles, roleId] });
     }
@@ -147,10 +155,7 @@ export default function ListUsers() {
         />
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="border-dashed"
-            >
+            <Button variant="outline" className="border-dashed">
               <CircleFadingPlus className="h-4 w-4 shrink-0" />
               Função
               {filters.roles.length > 0 && (

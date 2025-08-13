@@ -72,9 +72,9 @@ export default function CreateRole({ trigger, onSuccess }: CreateRoleProps) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Criar cargo</DialogTitle>
+          <DialogTitle>Criar função</DialogTitle>
           <DialogDescription>
-            Crie um novo cargo para o sistema.
+            Crie um novo função para o sistema.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -118,7 +118,7 @@ export default function CreateRole({ trigger, onSuccess }: CreateRoleProps) {
                 </Button>
               </DialogClose>
               <Button type="submit" loading={isSubmitting}>
-                Criar cargo
+                Criar função
               </Button>
             </div>
           </form>
