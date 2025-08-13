@@ -5,7 +5,6 @@ import type { User } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useGetRoles } from "@/app/(main)/(users)/queries/roles";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,6 +36,7 @@ import {
   type CreateUserSchema,
   createUserSchema,
 } from "@/lib/validators/users";
+import { useGetRoles } from "../../queries/roles";
 import { USE_GET_USERS_KEY } from "../../queries/users";
 import { createUser } from "../../server/users";
 

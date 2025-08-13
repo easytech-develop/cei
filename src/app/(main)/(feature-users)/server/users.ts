@@ -1,7 +1,6 @@
 "use server";
 
 import type { Prisma, Role, User } from "@prisma/client";
-import type { UserWithRoles } from "@/app/(main)/(users)/types/users";
 import { hashPassword, logError } from "@/lib/utils";
 import type {
   CreateUserSchema,
@@ -9,6 +8,7 @@ import type {
 } from "@/lib/validators/users";
 import { prisma } from "@/server/prisma";
 import type { ActionResponse, Meta } from "@/types/generics";
+import type { UserWithRoles } from "../types/users";
 
 // Constantes para mensagens de erro e sucesso
 const MESSAGES = {

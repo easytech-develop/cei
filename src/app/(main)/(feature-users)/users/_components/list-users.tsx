@@ -3,12 +3,12 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { UserWithRoles } from "@/app/(main)/(users)/types/users";
 import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Meta } from "@/types/generics";
 import { useGetUsers } from "../../queries/users";
+import type { UserWithRoles } from "../../types/users";
 import DeleteUser from "./delete-user";
 import UpdateUser from "./update-user";
 
