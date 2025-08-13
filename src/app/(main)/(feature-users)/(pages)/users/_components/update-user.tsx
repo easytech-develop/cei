@@ -36,9 +36,9 @@ import {
   type UpdateUserSchema,
   updateUserSchema,
 } from "@/lib/validators/users";
-import { useGetRoles } from "../../queries/roles";
-import { USE_GET_USERS_KEY } from "../../queries/users";
-import { updateUser } from "../../server/users";
+import { useGetRoles } from "../../../queries/roles";
+import { USE_GET_USERS_KEY } from "../../../queries/users";
+import { updateUser } from "../../../server/users";
 
 type UpdateUserProps = {
   trigger: React.ReactNode;

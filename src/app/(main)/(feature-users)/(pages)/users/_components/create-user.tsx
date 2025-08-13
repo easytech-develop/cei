@@ -36,9 +36,9 @@ import {
   type CreateUserSchema,
   createUserSchema,
 } from "@/lib/validators/users";
-import { useGetRoles } from "../../queries/roles";
-import { USE_GET_USERS_KEY } from "../../queries/users";
-import { createUser } from "../../server/users";
+import { useGetRoles } from "../../../queries/roles";
+import { USE_GET_USERS_KEY } from "../../../queries/users";
+import { createUser } from "../../../server/users";
 
 type CreateUserProps = {
   trigger: React.ReactNode;
