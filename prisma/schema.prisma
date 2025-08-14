@@ -7,40 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ----------- ENUMS -----------
-
-enum ExpenseStatus {
-  DRAFT
-  OPEN
-  PARTIALLY_PAID
-  PAID
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  PARTIAL
-  PAID
-  CANCELLED
-}
-
-enum PaymentMethodType {
-  PIX
-  TED
-  DOC
-  BOLETO
-  CARTAO_CREDITO
-  CARTAO_DEBITO
-  DINHEIRO
-  CHEQUE
-}
+// ----------- FEATURE - USUÁRIOS & AUTENTICAÇÃO -----------
 
 enum UserStatus {
   ACTIVE
   SUSPENDED
 }
-
-// ----------- USUÁRIOS & AUTENTICAÇÃO -----------
 
 model User {
   id           String     @id @default(uuid(7))
@@ -126,7 +98,7 @@ model UserPermission {
   @@id([userId, permissionId])
 }
 
-// ----------- AUDITORIA -----------
+// ----------- FEATURE - AUDITORIA -----------
 
 model AuditLog {
   id        String   @id @default(uuid(7))
@@ -146,139 +118,209 @@ model AuditLog {
   @@index([entity, entityId, at])
 }
 
-// ----------- ESTRUTURA DE DADOS -----------
+// ----------- FEATURE - CONTROLE FINANCEIRO -----------
 
-model Vendor {
-  id        String    @id @default(uuid(7))
-  name      String
-  document  String? // CPF/CNPJ
-  email     String?
-  phone     String?
-  active    Boolean   @default(true)
+enum ContactRole {
+  CUSTOMER
+  SUPPLIER
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum CashAccountType {
+  CASH // Caixa físico
+  CHECKING // Conta corrente
+  SAVINGS // Conta poupança
+  INVESTMENT // Aplicações financeiras
+  OTHER
+}
+
+enum DocumentDirection {
+  IN
+  OUT
+}
+
+enum DocumentStatus {
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum InstallmentStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  BOLETO
+  CHECK
+}
+
+model Contact {
+  id       String        @id @default(uuid(7))
+  name     String
+  document String? // CPF/CNPJ
+  email    String?
+  phone    String?
+  address  String?
+  roles    ContactRole[] @default([]) // CUSTOMER, SUPPLIER, ou ambos
+
+  documents Document[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  Expenses Expense[]
-
-  @@index([name])
-}
-
-model ExpenseCategory {
-  id        String           @id @default(uuid(7))
-  code      String // ex: 3.1 Alimentação
-  name      String
-  parent    ExpenseCategory? @relation("Parent", fields: [parentId], references: [id])
-  parentId  String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  deletedAt DateTime?
-
-  children ExpenseCategory[] @relation("Parent")
-  Expense  Expense[]
-
-  @@unique([code])
-  @@index([name])
+  @@index([name, document])
 }
 
 model Account {
-  id             String    @id @default(uuid(7))
-  name           String // Caixa, Banco XYZ
-  type           String // CASH, BANK
-  openingBalance Decimal   @default(0) @db.Decimal(14, 2)
-  active         Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id       String      @id @default(uuid(7))
+  name     String
+  code     String? // código contábil
+  type     AccountType // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  parent   Account?    @relation("AccountHierarchy", fields: [parentId], references: [id])
+  parentId String?
 
-  Payments ExpensePayment[]
-}
+  CashAccount CashAccount[]
+  Account     Account[]     @relation("AccountHierarchy")
+  Category    Category[]
 
-model Expense {
-  id             String        @id @default(uuid(7))
-  vendorId       String
-  categoryId     String
-  description    String
-  competenceDate DateTime
-  issueDate      DateTime?
-  totalNet       Decimal       @db.Decimal(14, 2)
-  status         ExpenseStatus @default(DRAFT)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  deletedAt      DateTime?
-
-  Vendor   Vendor          @relation(fields: [vendorId], references: [id])
-  Category ExpenseCategory @relation(fields: [categoryId], references: [id])
-
-  Items        ExpenseItem[]
-  Installments ExpenseInstallment[]
-  Attachments  ExpenseAttachment[]
-
-  @@index([status, competenceDate])
-}
-
-model ExpenseItem {
-  id        String    @id @default(uuid(7))
-  expenseId String
-  name      String
-  quantity  Decimal   @default(1) @db.Decimal(14, 4)
-  unitPrice Decimal   @db.Decimal(14, 4)
-  discount  Decimal   @default(0) @db.Decimal(14, 2)
-  total     Decimal   @db.Decimal(14, 2)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  Expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  @@index([name, code])
 }
 
-model ExpenseInstallment {
-  id        String        @id @default(uuid(7))
-  expenseId String
-  number    Int
-  dueDate   DateTime
-  amount    Decimal       @db.Decimal(14, 2)
-  status    PaymentStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+model CashAccount {
+  id             String          @id @default(uuid(7))
+  name           String
+  type           CashAccountType
+  agency         String?
+  accountNumber  String?
+  pixKey         String?
+  account        Account?        @relation(fields: [accountId], references: [id])
+  accountId      String?
+  openingBalance Decimal         @default(0.00) @db.Decimal(18, 2)
+  isActive       Boolean         @default(true)
+
+  transactions Transaction[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  Expense  Expense          @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  Payments ExpensePayment[]
-
-  @@unique([expenseId, number])
-  @@index([dueDate, status])
+  @@index([name, accountNumber])
 }
 
-model ExpensePayment {
-  id            String            @id @default(uuid(7))
+model Category {
+  id          String            @id @default(uuid(7))
+  name        String
+  direction   DocumentDirection // IN = a receber | OUT = a pagar
+  description String?
+  account     Account?          @relation(fields: [accountId], references: [id])
+  accountId   String?
+
+  documents Document[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([name, direction])
+}
+
+model CostCenter {
+  id       String      @id @default(uuid(7))
+  name     String
+  code     String?
+  parent   CostCenter? @relation("CostCenterHierarchy", fields: [parentId], references: [id])
+  parentId String?
+
+  documents  Document[]
+  CostCenter CostCenter[] @relation("CostCenterHierarchy")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([name, code])
+}
+
+model Document {
+  id             String            @id @default(uuid(7))
+  direction      DocumentDirection // IN = a receber | OUT = a pagar
+  contact        Contact           @relation(fields: [contactId], references: [id])
+  contactId      String
+  category       Category          @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  costCenter     CostCenter?       @relation(fields: [costCenterId], references: [id])
+  costCenterId   String?
+  totalAmount    Decimal           @db.Decimal(18, 2)
+  issueDate      DateTime          @default(now())
+  dueDate        DateTime
+  competenceDate DateTime
+  status         DocumentStatus    @default(OPEN)
+  documentNumber String?
+  fiscalKey      String?
+  series         String?
+  description    String?
+
+  installments Installment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([documentNumber, fiscalKey])
+}
+
+model Installment {
+  id         String            @id @default(uuid(7))
+  document   Document          @relation(fields: [documentId], references: [id])
+  documentId String
+  number     Int
+  amount     Decimal           @db.Decimal(18, 2)
+  dueDate    DateTime
+  status     InstallmentStatus @default(PENDING)
+
+  transactions Transaction[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([documentId, number])
+}
+
+model Transaction {
+  id            String        @id @default(uuid(7))
+  installment   Installment   @relation(fields: [installmentId], references: [id])
   installmentId String
-  paidAt        DateTime
-  amount        Decimal           @db.Decimal(14, 2)
-  accountId     String
-  paymentMethod PaymentMethodType
-  note          String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  deletedAt     DateTime?
+  date          DateTime      @default(now())
+  amount        Decimal       @db.Decimal(18, 2)
+  method        PaymentMethod
+  notes         String?
+  cashAccount   CashAccount?  @relation(fields: [cashAccountId], references: [id])
+  cashAccountId String?
 
-  Installment ExpenseInstallment @relation(fields: [installmentId], references: [id], onDelete: Cascade)
-  Account     Account            @relation(fields: [accountId], references: [id])
-
-  @@index([paidAt])
-}
-
-model ExpenseAttachment {
-  id         String    @id @default(uuid(7))
-  expenseId  String
-  fileKey    String
-  fileName   String
-  mimeType   String?
-  size       Int?
-  uploadedAt DateTime  @default(now())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
-
-  Expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }

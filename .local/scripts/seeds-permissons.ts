@@ -139,7 +139,7 @@ async function main() {
   const admin = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL },
     update: { name: ADMIN_NAME, passwordHash },
-    create: { email: ADMIN_EMAIL, name: ADMIN_NAME, passwordHash, status: "ACTIVE" as any },
+    create: { email: ADMIN_EMAIL, name: ADMIN_NAME, passwordHash, status: "ACTIVE" },
   });
 
   // garante vínculo com ADMIN
