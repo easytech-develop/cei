@@ -3,24 +3,18 @@
 import {
   AlertTriangle,
   BanknoteArrowDown,
-  BarChart3,
   Bell,
   Calendar,
   ChevronLeft,
-  Database,
-  FileText,
   HelpCircle,
   List,
   Moon,
   Plus,
-  Send,
   Settings,
-  Share2,
   Shield,
   Star,
   Sun,
   Tag,
-  Upload,
   UserCog,
   UserStar,
   Users,
@@ -59,85 +53,10 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
   {
-    id: "share",
-    icon: Share2,
-    label: "Compartilhar",
-    subItems: [
-      {
-        id: "share-link",
-        icon: Share2,
-        label: "Compartilhar Link",
-        href: "/share/link",
-      },
-      {
-        id: "share-file",
-        icon: Upload,
-        label: "Compartilhar Arquivo",
-        href: "/share/file",
-      },
-      {
-        id: "share-email",
-        icon: Send,
-        label: "Compartilhar por Email",
-        href: "/share/email",
-      },
-    ],
-  },
-  {
-    id: "upload",
-    icon: Upload,
-    label: "Upload",
-    subItems: [
-      {
-        id: "upload-file",
-        icon: Upload,
-        label: "Upload de Arquivo",
-        href: "/upload/file",
-      },
-      {
-        id: "upload-bulk",
-        icon: Database,
-        label: "Upload em Lote",
-        href: "/upload/bulk",
-      },
-      {
-        id: "upload-sync",
-        icon: Send,
-        label: "Sincronizar",
-        href: "/upload/sync",
-      },
-    ],
-  },
-  {
     id: "favorites",
     icon: Star,
     label: "Favoritos",
     href: "/favorites",
-  },
-  {
-    id: "add",
-    icon: Plus,
-    label: "Adicionar",
-    subItems: [
-      {
-        id: "add-user",
-        icon: Users,
-        label: "Adicionar Usuário",
-        href: "/add/user",
-      },
-      {
-        id: "add-document",
-        icon: FileText,
-        label: "Adicionar Documento",
-        href: "/add/document",
-      },
-      {
-        id: "add-report",
-        icon: BarChart3,
-        label: "Adicionar Relatório",
-        href: "/add/report",
-      },
-    ],
   },
   {
     id: "vendors",
@@ -171,22 +90,10 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
-    id: "database",
-    icon: Database,
-    label: "Banco de Dados",
-    href: "/database",
-  },
-  {
     id: "calendar",
     icon: Calendar,
     label: "Calendário",
     href: "/calendar",
-  },
-  {
-    id: "send",
-    icon: Send,
-    label: "Enviar",
-    href: "/send",
   },
   {
     id: "config",
