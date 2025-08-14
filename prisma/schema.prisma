@@ -152,7 +152,7 @@ model Account {
   id             String    @id @default(uuid(7))
   name           String // Caixa, Banco XYZ
   type           String // CASH, BANK
-  openingBalance Decimal   @default(0) @db.Decimal(14, 2)
+  openingBalance Float     @default(0)
   active         Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -203,7 +203,7 @@ model Expense {
   description    String
   competenceDate DateTime
   issueDate      DateTime?
-  totalNet       Decimal       @db.Decimal(14, 2)
+  totalNet       Float
   status         ExpenseStatus @default(DRAFT)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -223,10 +223,10 @@ model ExpenseItem {
   id        String    @id @default(uuid(7))
   expenseId String
   name      String
-  quantity  Decimal   @default(1) @db.Decimal(14, 4)
-  unitPrice Decimal   @db.Decimal(14, 4)
-  discount  Decimal   @default(0) @db.Decimal(14, 2)
-  total     Decimal   @db.Decimal(14, 2)
+  quantity  Float     @default(1)
+  unitPrice Float
+  discount  Float     @default(0)
+  total     Float
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -239,7 +239,7 @@ model ExpenseInstallment {
   expenseId String
   number    Int
   dueDate   DateTime
-  amount    Decimal       @db.Decimal(14, 2)
+  amount    Float
   status    PaymentStatus @default(PENDING)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
@@ -256,7 +256,7 @@ model ExpensePayment {
   id            String            @id @default(uuid(7))
   installmentId String
   paidAt        DateTime
-  amount        Decimal           @db.Decimal(14, 2)
+  amount        Float
   accountId     String
   paymentMethod PaymentMethodType
   note          String?

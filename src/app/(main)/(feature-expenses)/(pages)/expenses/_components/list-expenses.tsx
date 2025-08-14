@@ -29,6 +29,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Meta } from "@/types/generics";
 import { useGetCategories } from "../../../queries/categories";
@@ -69,12 +75,20 @@ const columns: ColumnDef<ExpenseWithRelations>[] = [
     header: "Descrição",
     cell: ({ row }) => {
       return (
-        <div
-          className="max-w-[300px] truncate"
-          title={row.original.description}
-        >
-          {row.original.description}
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="max-w-[300px] truncate cursor-help">
+                {row.original.description}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs break-words">
+                {row.original.description}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     },
   },
