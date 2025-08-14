@@ -118,7 +118,7 @@ model AuditLog {
   @@index([entity, entityId, at])
 }
 
-// ----------- FEATURE - CONTROLE FINANCEIRO -----------
+// ----------- FEATURE - CONTROLE FINANCEIRO (v2) -----------
 
 enum ContactRole {
   CUSTOMER
@@ -134,16 +134,16 @@ enum AccountType {
 }
 
 enum CashAccountType {
-  CASH // Caixa físico
-  CHECKING // Conta corrente
-  SAVINGS // Conta poupança
-  INVESTMENT // Aplicações financeiras
+  CASH
+  CHECKING
+  SAVINGS
+  INVESTMENT
   OTHER
 }
 
 enum DocumentDirection {
-  IN
-  OUT
+  IN // a receber
+  OUT // a pagar
 }
 
 enum DocumentStatus {
@@ -158,7 +158,7 @@ enum InstallmentStatus {
   PARTIALLY_PAID
   PAID
   CANCELLED
-  OVERDUE
+  // OVERDUE  // <- Removido: calcule por (status != PAID && dueAt < now())
 }
 
 enum PaymentMethod {
@@ -171,41 +171,54 @@ enum PaymentMethod {
   CHECK
 }
 
+enum JournalSide {
+  DEBIT
+  CREDIT
+}
+
+// ---------- CORE ENTIDADES ----------
+
 model Contact {
   id       String        @id @default(uuid(7))
   name     String
-  document String? // CPF/CNPJ
+  document String?       @unique // evita duplicar CPF/CNPJ
   email    String?
   phone    String?
   address  String?
-  roles    ContactRole[] @default([]) // CUSTOMER, SUPPLIER, ou ambos
+  roles    ContactRole[] @default([])
 
   documents Document[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([name, document])
+  @@index([name])
 }
 
 model Account {
   id       String      @id @default(uuid(7))
   name     String
   code     String? // código contábil
-  type     AccountType // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  type     AccountType
   parent   Account?    @relation("AccountHierarchy", fields: [parentId], references: [id])
   parentId String?
 
   CashAccount CashAccount[]
   Account     Account[]     @relation("AccountHierarchy")
   Category    Category[]
+  JournalLine JournalLine[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([name, code])
+  @@index([name])
+  @@index([code])
 }
 
 model CashAccount {
@@ -221,24 +234,31 @@ model CashAccount {
   isActive       Boolean         @default(true)
 
   transactions Transaction[]
+  transferFrom CashTransfer[] @relation("TransferFrom")
+  transferTo   CashTransfer[] @relation("TransferTo")
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([name, accountNumber])
+  @@index([name])
+  @@index([accountNumber])
 }
 
 model Category {
   id          String            @id @default(uuid(7))
   name        String
-  direction   DocumentDirection // IN = a receber | OUT = a pagar
+  direction   DocumentDirection // IN/OUT
   description String?
   account     Account?          @relation(fields: [accountId], references: [id])
   accountId   String?
 
   documents Document[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -253,29 +273,52 @@ model CostCenter {
   parent   CostCenter? @relation("CostCenterHierarchy", fields: [parentId], references: [id])
   parentId String?
 
-  documents  Document[]
-  CostCenter CostCenter[] @relation("CostCenterHierarchy")
+  documents   Document[]
+  CostCenter  CostCenter[]  @relation("CostCenterHierarchy")
+  JournalLine JournalLine[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([name, code])
+  @@index([name])
+  @@index([code])
+}
+
+// Regras simples de multa/juros/desconto (opcional, mas útil)
+model BillingRule {
+  id              String  @id @default(uuid(7))
+  name            String
+  lateFeePercent  Decimal @default(0.00) @db.Decimal(18, 2) // multa %
+  interestMonthly Decimal @default(0.00) @db.Decimal(18, 2) // juros % ao mês
+  discountPercent Decimal @default(0.00) @db.Decimal(18, 2) // desconto % até data
+  notes           String?
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  Document  Document[]
 }
 
 model Document {
   id             String            @id @default(uuid(7))
-  direction      DocumentDirection // IN = a receber | OUT = a pagar
+  direction      DocumentDirection
   contact        Contact           @relation(fields: [contactId], references: [id])
   contactId      String
   category       Category          @relation(fields: [categoryId], references: [id])
   categoryId     String
   costCenter     CostCenter?       @relation(fields: [costCenterId], references: [id])
   costCenterId   String?
+  billingRule    BillingRule?      @relation(fields: [billingRuleId], references: [id])
+  billingRuleId  String?
   totalAmount    Decimal           @db.Decimal(18, 2)
-  issueDate      DateTime          @default(now())
-  dueDate        DateTime
-  competenceDate DateTime
+  issueAt        DateTime          @default(now())
+  dueAt          DateTime
+  competenceAt   DateTime
   status         DocumentStatus    @default(OPEN)
   documentNumber String?
   fiscalKey      String?
@@ -284,11 +327,15 @@ model Document {
 
   installments Installment[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([documentNumber, fiscalKey])
+  @@unique([direction, contactId, series, documentNumber])
+  @@index([dueAt, status])
+  @@index([contactId])
 }
 
 model Installment {
@@ -297,30 +344,128 @@ model Installment {
   documentId String
   number     Int
   amount     Decimal           @db.Decimal(18, 2)
-  dueDate    DateTime
+  dueAt      DateTime
   status     InstallmentStatus @default(PENDING)
 
-  transactions Transaction[]
+  allocations TransactionAllocation[]
 
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@unique([documentId, number])
+  @@index([dueAt, status])
 }
 
+// Movimento financeiro (um pagamento/recebimento)
 model Transaction {
   id            String        @id @default(uuid(7))
-  installment   Installment   @relation(fields: [installmentId], references: [id])
-  installmentId String
   date          DateTime      @default(now())
-  amount        Decimal       @db.Decimal(18, 2)
+  amount        Decimal       @db.Decimal(18, 2) // valor total do movimento
   method        PaymentMethod
   notes         String?
   cashAccount   CashAccount?  @relation(fields: [cashAccountId], references: [id])
   cashAccountId String?
 
+  allocations TransactionAllocation[]
+
+  // ponte 1:1 opcional para transferências
+  transferOut CashTransfer? @relation("TransferOut")
+  transferIn  CashTransfer? @relation("TransferIn")
+
+  createdBy String?
+  updatedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@index([cashAccountId, date])
+}
+
+// N:N entre Transaction e Installment, com detalhamento de valores
+model TransactionAllocation {
+  id            String      @id @default(uuid(7))
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String
+  installment   Installment @relation(fields: [installmentId], references: [id])
+  installmentId String
+
+  principal Decimal @default(0.00) @db.Decimal(18, 2)
+  interest  Decimal @default(0.00) @db.Decimal(18, 2)
+  fine      Decimal @default(0.00) @db.Decimal(18, 2)
+  discount  Decimal @default(0.00) @db.Decimal(18, 2)
+  notes     String?
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@unique([transactionId, installmentId]) // evita alocação duplicada
+  @@index([installmentId])
+}
+
+// Transferências entre contas (gera 2 movimentos atômicos)
+model CashTransfer {
+  id            String      @id @default(uuid(7))
+  fromAccount   CashAccount @relation("TransferFrom", fields: [fromAccountId], references: [id])
+  fromAccountId String
+  toAccount     CashAccount @relation("TransferTo", fields: [toAccountId], references: [id])
+  toAccountId   String
+  amount        Decimal     @db.Decimal(18, 2)
+  date          DateTime    @default(now())
+  notes         String?
+
+  outTransaction   Transaction? @relation("TransferOut", fields: [outTransactionId], references: [id])
+  outTransactionId String?      @unique
+  inTransaction    Transaction? @relation("TransferIn", fields: [inTransactionId], references: [id])
+  inTransactionId  String?      @unique
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([fromAccountId, toAccountId])
+}
+
+// ---------- JOURNAL (Partidas Dobradas) ----------
+
+model JournalEntry {
+  id           String   @id @default(uuid(7))
+  date         DateTime @default(now())
+  competenceAt DateTime
+  memo         String?
+  originTable  String? // "Document" / "Transaction" / ...
+  originId     String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+
+  lines JournalLine[]
+
+  @@index([date])
+  @@index([competenceAt])
+}
+
+model JournalLine {
+  id           String       @id @default(uuid(7))
+  entry        JournalEntry @relation(fields: [entryId], references: [id])
+  entryId      String
+  account      Account      @relation(fields: [accountId], references: [id])
+  accountId    String
+  side         JournalSide
+  amount       Decimal      @db.Decimal(18, 2)
+  costCenter   CostCenter?  @relation(fields: [costCenterId], references: [id])
+  costCenterId String?
+
+  // Rastreabilidade opcional até o nível operacional
+  documentId    String?
+  installmentId String?
+  transactionId String?
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+  @@index([costCenterId])
+  @@index([transactionId])
 }
