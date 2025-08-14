@@ -66,7 +66,7 @@ export async function getCategories({
   meta: Meta;
   filters?: {
     search?: string;
-    parentId?: string;
+    parentId?: string | null | undefined;
   };
 }): ActionResponse<{
   categories: CategoryWithChildren[];
@@ -94,7 +94,7 @@ export async function getCategories({
       ];
     }
 
-    if (filters?.parentId) {
+    if (filters?.parentId !== undefined && filters?.parentId !== null) {
       where.parentId = filters.parentId;
     } else if (filters?.parentId === null) {
       where.parentId = null;

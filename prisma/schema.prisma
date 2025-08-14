@@ -40,7 +40,7 @@ enum UserStatus {
   SUSPENDED
 }
 
-// ----------- USUÁRIOS & AUTENTICAÇÃO -----------
+// ----------- FEATURE - USUÁRIOS & AUTENTICAÇÃO -----------
 
 model User {
   id           String     @id @default(uuid(7))
@@ -126,7 +126,7 @@ model UserPermission {
   @@id([userId, permissionId])
 }
 
-// ----------- AUDITORIA -----------
+// ----------- FEATURE - AUDITORIA -----------
 
 model AuditLog {
   id        String   @id @default(uuid(7))
@@ -147,6 +147,21 @@ model AuditLog {
 }
 
 // ----------- ESTRUTURA DE DADOS -----------
+
+model Account {
+  id             String    @id @default(uuid(7))
+  name           String // Caixa, Banco XYZ
+  type           String // CASH, BANK
+  openingBalance Decimal   @default(0) @db.Decimal(14, 2)
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  Payments ExpensePayment[]
+}
+
+// ----------- FEATURE - FORNECEDORES -----------
 
 model Vendor {
   id        String    @id @default(uuid(7))
@@ -179,19 +194,6 @@ model ExpenseCategory {
 
   @@unique([code])
   @@index([name])
-}
-
-model Account {
-  id             String    @id @default(uuid(7))
-  name           String // Caixa, Banco XYZ
-  type           String // CASH, BANK
-  openingBalance Decimal   @default(0) @db.Decimal(14, 2)
-  active         Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  Payments ExpensePayment[]
 }
 
 model Expense {

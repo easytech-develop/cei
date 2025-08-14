@@ -29,7 +29,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { Meta } from "@/types/generics";
 import { useGetCategories } from "../../../queries/categories";
@@ -266,6 +265,7 @@ export default function ListExpenses() {
                     onSelect={() => handleStatusFilter("DRAFT")}
                     className="flex items-center gap-2"
                   >
+                    Rascunho
                     <Check
                       className={cn(
                         "h-4 w-4",
@@ -274,24 +274,24 @@ export default function ListExpenses() {
                           : "opacity-0",
                       )}
                     />
-                    Rascunho
                   </CommandItem>
                   <CommandItem
                     onSelect={() => handleStatusFilter("OPEN")}
                     className="flex items-center gap-2"
                   >
+                    Aberta
                     <Check
                       className={cn(
                         "h-4 w-4",
                         filters.status === "OPEN" ? "opacity-100" : "opacity-0",
                       )}
                     />
-                    Aberta
                   </CommandItem>
                   <CommandItem
                     onSelect={() => handleStatusFilter("PARTIALLY_PAID")}
                     className="flex items-center gap-2"
                   >
+                    Parcialmente Paga
                     <Check
                       className={cn(
                         "h-4 w-4",
@@ -300,24 +300,24 @@ export default function ListExpenses() {
                           : "opacity-0",
                       )}
                     />
-                    Parcialmente Paga
                   </CommandItem>
                   <CommandItem
                     onSelect={() => handleStatusFilter("PAID")}
                     className="flex items-center gap-2"
                   >
+                    Paga
                     <Check
                       className={cn(
                         "h-4 w-4",
                         filters.status === "PAID" ? "opacity-100" : "opacity-0",
                       )}
                     />
-                    Paga
                   </CommandItem>
                   <CommandItem
                     onSelect={() => handleStatusFilter("CANCELLED")}
                     className="flex items-center gap-2"
                   >
+                    Cancelada
                     <Check
                       className={cn(
                         "h-4 w-4",
@@ -326,7 +326,6 @@ export default function ListExpenses() {
                           : "opacity-0",
                       )}
                     />
-                    Cancelada
                   </CommandItem>
                 </CommandGroup>
                 <CommandSeparator />
@@ -366,6 +365,7 @@ export default function ListExpenses() {
                       onSelect={() => handleVendorFilter(vendor.id)}
                       className="flex items-center gap-2"
                     >
+                      {vendor.name}
                       <Check
                         className={cn(
                           "h-4 w-4",
@@ -374,7 +374,6 @@ export default function ListExpenses() {
                             : "opacity-0",
                         )}
                       />
-                      {vendor.name}
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -415,6 +414,7 @@ export default function ListExpenses() {
                       onSelect={() => handleCategoryFilter(category.id)}
                       className="flex items-center gap-2"
                     >
+                      {category.name}
                       <Check
                         className={cn(
                           "h-4 w-4",
@@ -423,7 +423,6 @@ export default function ListExpenses() {
                             : "opacity-0",
                         )}
                       />
-                      {category.name}
                     </CommandItem>
                   ))}
                 </CommandGroup>

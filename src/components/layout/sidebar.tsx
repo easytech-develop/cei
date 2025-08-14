@@ -17,11 +17,12 @@ import {
   Settings,
   Share2,
   Shield,
-  Smartphone,
   Star,
   Sun,
+  Tag,
   Upload,
   UserCog,
+  UserStar,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -139,10 +140,10 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
-    id: "mobile",
-    icon: Smartphone,
-    label: "Mobile",
-    href: "/mobile",
+    id: "vendors",
+    icon: UserStar,
+    label: "Fornecedores",
+    href: "/vendors",
   },
   {
     id: "expenses",
@@ -160,6 +161,12 @@ const sidebarItems: SidebarItem[] = [
         icon: Plus,
         label: "Adicionar Despesa",
         href: "/expenses/add",
+      },
+      {
+        id: "expenses-categories",
+        icon: Tag,
+        label: "Categorias de Despesa",
+        href: "/expenses/categories",
       },
     ],
   },
@@ -280,10 +287,12 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                 className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 bg-sidebar border border-sidebar-border"
                 onClick={() => setIsCollapsed(false)}
               >
-                <ChevronLeft className={cn(
-                  "h-4 w-4 text-sidebar-foreground transition-all duration-200",
-                  isCollapsed && "rotate-180"
-                )} />
+                <ChevronLeft
+                  className={cn(
+                    "h-4 w-4 text-sidebar-foreground transition-all duration-200",
+                    isCollapsed && "rotate-180",
+                  )}
+                />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">Expandir Sidebar</TooltipContent>
