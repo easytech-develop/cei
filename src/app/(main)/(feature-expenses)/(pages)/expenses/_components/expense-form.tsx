@@ -122,7 +122,7 @@ export default function ExpenseForm({
       totalNet: initialData ? Number(initialData.totalNet) : 0,
       status: (initialData?.status || "DRAFT") as "DRAFT" | "OPEN" | "PARTIALLY_PAID" | "PAID" | "CANCELLED",
       items: items,
-      installments: installments as any,
+      installments: installments,
     },
   });
 
@@ -137,7 +137,7 @@ export default function ExpenseForm({
     return quantity * unitPrice - discount;
   };
 
-  const updateItem = (index: number, field: string, value: any) => {
+  const updateItem = (index: number, field: string, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
 
@@ -176,7 +176,7 @@ export default function ExpenseForm({
     form.setValue("totalNet", totalNet);
   };
 
-  const updateInstallment = (index: number, field: string, value: any) => {
+  const updateInstallment = (index: number, field: string, value: string | number | Date) => {
     const newInstallments = [...installments];
     newInstallments[index] = { ...newInstallments[index], [field]: value };
     setInstallments(newInstallments);
@@ -191,7 +191,7 @@ export default function ExpenseForm({
       status: "PENDING" as const,
     };
     setInstallments([...installments, newInstallment]);
-    form.setValue("installments", [...installments, newInstallment] as any);
+    form.setValue("installments", [...installments, newInstallment]);
   };
 
   const removeInstallment = (index: number) => {

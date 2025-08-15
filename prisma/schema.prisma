@@ -7,40 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ----------- ENUMS -----------
 
-enum ExpenseStatus {
-  DRAFT
-  OPEN
-  PARTIALLY_PAID
-  PAID
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  PARTIAL
-  PAID
-  CANCELLED
-}
-
-enum PaymentMethodType {
-  PIX
-  TED
-  DOC
-  BOLETO
-  CARTAO_CREDITO
-  CARTAO_DEBITO
-  DINHEIRO
-  CHEQUE
-}
+// ----------- FEATURE - USUÁRIOS & AUTENTICAÇÃO -----------
 
 enum UserStatus {
   ACTIVE
   SUSPENDED
 }
-
-// ----------- FEATURE - USUÁRIOS & AUTENTICAÇÃO -----------
 
 model User {
   id           String     @id @default(uuid(7))
@@ -148,6 +121,32 @@ model AuditLog {
 
 // ----------- ESTRUTURA DE DADOS -----------
 
+enum ExpenseStatus {
+  DRAFT
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethodType {
+  PIX
+  TED
+  DOC
+  BOLETO
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  DINHEIRO
+  CHEQUE
+}
+
 model Account {
   id             String    @id @default(uuid(7))
   name           String // Caixa, Banco XYZ
@@ -160,8 +159,6 @@ model Account {
 
   Payments ExpensePayment[]
 }
-
-// ----------- FEATURE - FORNECEDORES -----------
 
 model Vendor {
   id        String    @id @default(uuid(7))

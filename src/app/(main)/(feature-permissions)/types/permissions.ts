@@ -22,6 +22,6 @@ export type UserWithPermissions = User & {
   UserPermission: {
     Permission: Permission;
     mode: string;
-    scopeJson: any;
+    scopeJson: Record<string, unknown> | null;
   }[];
 };

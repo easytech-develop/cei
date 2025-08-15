@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
 
     // Construir filtros de data
-    const dateFilter: any = {};
+    const dateFilter: { at?: { gte?: Date; lte?: Date } } = {};
     if (startDate || endDate) {
       dateFilter.at = {};
       if (startDate) {

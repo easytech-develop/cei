@@ -92,7 +92,7 @@ export async function GET() {
           return acc.filter((p) => p.code !== permission.code).concat(permission);
         }
         return acc;
-      }, [] as any[]);
+      }, [] as typeof allPermissions);
 
       return {
         id: user.id,

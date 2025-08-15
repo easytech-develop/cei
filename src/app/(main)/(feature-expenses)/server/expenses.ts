@@ -1,6 +1,14 @@
 "use server";
 
-import type { Expense, Prisma } from "@prisma/client";
+import type {
+  Expense,
+  ExpenseAttachment,
+  ExpenseInstallment,
+  ExpenseItem,
+  ExpensePayment,
+  ExpenseStatus,
+  Prisma,
+} from "@prisma/client";
 import type {
   CreateExpenseSchema,
   UpdateExpenseSchema,
@@ -8,7 +16,10 @@ import type {
 import { logError } from "@/lib/utils";
 import { prisma } from "@/server/prisma";
 import type { ActionResponse, Meta } from "@/types/generics";
-import type { ExpenseWithRelations } from "../types/expenses";
+import type {
+  ExpenseInstallmentWithPayments,
+  ExpenseWithRelations,
+} from "../types/expenses";
 
 const MESSAGES = {
   EXPENSES: {
@@ -111,7 +122,7 @@ export async function getExpenses({
     }
 
     if (filters?.status) {
-      where.status = filters.status as any;
+      where.status = filters.status as ExpenseStatus;
     }
 
     if (filters?.vendorId) {
@@ -453,11 +464,19 @@ export async function createPayment(data: {
   paidAt: Date;
   amount: number;
   accountId: string;
-  paymentMethod: "PIX" | "TED" | "DOC" | "BOLETO" | "CARTAO_CREDITO" | "CARTAO_DEBITO" | "DINHEIRO" | "CHEQUE";
+  paymentMethod:
+  | "PIX"
+  | "TED"
+  | "DOC"
+  | "BOLETO"
+  | "CARTAO_CREDITO"
+  | "CARTAO_DEBITO"
+  | "DINHEIRO"
+  | "CHEQUE";
   note?: string;
 }): ActionResponse<{
-  payment: any;
-  updatedInstallment: any;
+  payment: ExpensePayment;
+  updatedInstallment: ExpenseInstallment;
 }> {
   try {
     // Validar se a parcela existe
@@ -471,7 +490,10 @@ export async function createPayment(data: {
     });
 
     if (!installment) {
-      return { success: false, message: MESSAGES.PAYMENTS.INSTALLMENT_NOT_FOUND };
+      return {
+        success: false,
+        message: MESSAGES.PAYMENTS.INSTALLMENT_NOT_FOUND,
+      };
     }
 
     // Validar se a conta existe
@@ -484,7 +506,10 @@ export async function createPayment(data: {
     }
 
     // Calcular total já pago
-    const totalPaid = installment.Payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+    const totalPaid = installment.Payments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
     const remainingAmount = Number(installment.amount) - totalPaid;
 
     // Validar se o valor não excede o restante
@@ -510,7 +535,8 @@ export async function createPayment(data: {
 
       // Calcular novo total pago
       const newTotalPaid = totalPaid + data.amount;
-      const newStatus = newTotalPaid >= Number(installment.amount) ? "PAID" : "PARTIAL";
+      const newStatus =
+        newTotalPaid >= Number(installment.amount) ? "PAID" : "PARTIAL";
 
       // Atualizar status da parcela
       const updatedInstallment = await tx.expenseInstallment.update({
@@ -541,8 +567,8 @@ export async function createPayment(data: {
 }
 
 export async function deletePayment(id: string): ActionResponse<{
-  payment: any;
-  updatedInstallment: any;
+  payment: ExpensePayment;
+  updatedInstallment: ExpenseInstallment;
 }> {
   try {
     const payment = await prisma.expensePayment.findFirst({
@@ -570,9 +596,19 @@ export async function deletePayment(id: string): ActionResponse<{
       });
 
       // Recalcular status da parcela
-      const remainingPayments = payment.Installment.Payments.filter(p => p.id !== id);
-      const totalPaid = remainingPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const newStatus = totalPaid >= Number(payment.Installment.amount) ? "PAID" : totalPaid > 0 ? "PARTIAL" : "PENDING";
+      const remainingPayments = payment.Installment.Payments.filter(
+        (p) => p.id !== id,
+      );
+      const totalPaid = remainingPayments.reduce(
+        (sum, p) => sum + Number(p.amount),
+        0,
+      );
+      const newStatus =
+        totalPaid >= Number(payment.Installment.amount)
+          ? "PAID"
+          : totalPaid > 0
+            ? "PARTIAL"
+            : "PENDING";
 
       const updatedInstallment = await tx.expenseInstallment.update({
         where: { id: payment.installmentId },
@@ -609,7 +645,7 @@ export async function createAttachment(data: {
   mimeType?: string;
   size?: number;
 }): ActionResponse<{
-  attachment: any;
+  attachment: ExpenseAttachment;
 }> {
   try {
     // Validar se a despesa existe
@@ -643,7 +679,7 @@ export async function createAttachment(data: {
 }
 
 export async function deleteAttachment(id: string): ActionResponse<{
-  attachment: any;
+  attachment: ExpenseAttachment;
 }> {
   try {
     const attachment = await prisma.expenseAttachment.findFirst({
@@ -689,9 +725,15 @@ export async function updateExpenseStatus(expenseId: string): ActionResponse<{
     }
 
     const totalInstallments = expense.Installments.length;
-    const paidInstallments = expense.Installments.filter(i => i.status === "PAID").length;
-    const partialInstallments = expense.Installments.filter(i => i.status === "PARTIAL").length;
-    const cancelledInstallments = expense.Installments.filter(i => i.status === "CANCELLED").length;
+    const paidInstallments = expense.Installments.filter(
+      (i) => i.status === "PAID",
+    ).length;
+    const partialInstallments = expense.Installments.filter(
+      (i) => i.status === "PARTIAL",
+    ).length;
+    const cancelledInstallments = expense.Installments.filter(
+      (i) => i.status === "CANCELLED",
+    ).length;
 
     let newStatus: "DRAFT" | "OPEN" | "PARTIALLY_PAID" | "PAID" | "CANCELLED";
 
@@ -771,7 +813,11 @@ export async function getExpenseStats(filters?: {
       }),
       prisma.expenseInstallment.findMany({
         where: {
-          expenseId: { in: await prisma.expense.findMany({ where, select: { id: true } }).then(ids => ids.map(e => e.id)) },
+          expenseId: {
+            in: await prisma.expense
+              .findMany({ where, select: { id: true } })
+              .then((ids) => ids.map((e) => e.id)),
+          },
           deletedAt: null,
           dueDate: { lt: new Date() },
           status: { not: "PAID" },
@@ -780,17 +826,26 @@ export async function getExpenseStats(filters?: {
     ]);
 
     const totalExpenses = expenses.length;
-    const totalAmount = expenses.reduce((sum, expense) => sum + Number(expense.totalNet), 0);
+    const totalAmount = expenses.reduce(
+      (sum, expense) => sum + Number(expense.totalNet),
+      0,
+    );
 
     const paidAmount = expenses
-      .filter(expense => expense.status === "PAID")
+      .filter((expense) => expense.status === "PAID")
       .reduce((sum, expense) => sum + Number(expense.totalNet), 0);
 
     const pendingAmount = expenses
-      .filter(expense => expense.status !== "PAID" && expense.status !== "CANCELLED")
+      .filter(
+        (expense) =>
+          expense.status !== "PAID" && expense.status !== "CANCELLED",
+      )
       .reduce((sum, expense) => sum + Number(expense.totalNet), 0);
 
-    const overdueAmount = overdueInstallments.reduce((sum, installment) => sum + Number(installment.amount), 0);
+    const overdueAmount = overdueInstallments.reduce(
+      (sum, installment) => sum + Number(installment.amount),
+      0,
+    );
     const overdueCount = overdueInstallments.length;
 
     return {
@@ -821,7 +876,7 @@ export async function createInstallment(data: {
   amount: number;
   status?: "PENDING" | "PARTIAL" | "PAID" | "CANCELLED";
 }): ActionResponse<{
-  installment: any;
+  installment: ExpenseInstallment;
 }> {
   try {
     // Validar se a despesa existe
@@ -843,7 +898,10 @@ export async function createInstallment(data: {
     });
 
     if (existingInstallment) {
-      return { success: false, message: "Já existe uma parcela com este número" };
+      return {
+        success: false,
+        message: "Já existe uma parcela com este número",
+      };
     }
 
     const installment = await prisma.expenseInstallment.create({
@@ -874,7 +932,7 @@ export async function updateInstallment(data: {
   amount?: number;
   status?: "PENDING" | "PARTIAL" | "PAID" | "CANCELLED";
 }): ActionResponse<{
-  installment: any;
+  installment: ExpenseInstallment;
 }> {
   try {
     const existingInstallment = await prisma.expenseInstallment.findFirst({
@@ -897,7 +955,10 @@ export async function updateInstallment(data: {
       });
 
       if (duplicateInstallment) {
-        return { success: false, message: "Já existe uma parcela com este número" };
+        return {
+          success: false,
+          message: "Já existe uma parcela com este número",
+        };
       }
     }
 
@@ -923,7 +984,7 @@ export async function updateInstallment(data: {
 }
 
 export async function deleteInstallment(id: string): ActionResponse<{
-  installment: any;
+  installment: ExpenseInstallment;
 }> {
   try {
     const existingInstallment = await prisma.expenseInstallment.findFirst({
@@ -943,7 +1004,11 @@ export async function deleteInstallment(id: string): ActionResponse<{
     });
 
     if (hasPayments) {
-      return { success: false, message: "Não é possível excluir uma parcela que possui pagamentos registrados" };
+      return {
+        success: false,
+        message:
+          "Não é possível excluir uma parcela que possui pagamentos registrados",
+      };
     }
 
     const installment = await prisma.expenseInstallment.update({
@@ -971,7 +1036,7 @@ export async function createExpenseItem(data: {
   discount?: number;
   total: number;
 }): ActionResponse<{
-  item: any;
+  item: ExpenseItem;
 }> {
   try {
     // Validar se a despesa existe
@@ -1013,7 +1078,7 @@ export async function updateExpenseItem(data: {
   discount?: number;
   total?: number;
 }): ActionResponse<{
-  item: any;
+  item: ExpenseItem;
 }> {
   try {
     const existingItem = await prisma.expenseItem.findFirst({
@@ -1047,7 +1112,7 @@ export async function updateExpenseItem(data: {
 }
 
 export async function deleteExpenseItem(id: string): ActionResponse<{
-  item: any;
+  item: ExpenseItem;
 }> {
   try {
     const existingItem = await prisma.expenseItem.findFirst({
@@ -1080,7 +1145,7 @@ export async function getOverdueInstallments(filters?: {
   categoryId?: string;
   daysOverdue?: number;
 }): ActionResponse<{
-  installments: any[];
+  installments: ExpenseInstallmentWithPayments[];
 }> {
   try {
     const where: Prisma.ExpenseInstallmentWhereInput = {
@@ -1140,7 +1205,7 @@ export async function getUpcomingInstallments(filters?: {
   categoryId?: string;
   daysAhead?: number;
 }): ActionResponse<{
-  installments: any[];
+  installments: ExpenseInstallmentWithPayments[];
 }> {
   try {
     const where: Prisma.ExpenseInstallmentWhereInput = {

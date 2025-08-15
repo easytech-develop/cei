@@ -1,4 +1,4 @@
-import type { ExpenseCategory } from "@prisma/client";
+import type { Expense, ExpenseCategory } from "@prisma/client";
 
 export type CategoryWithChildren = ExpenseCategory & {
   children: ExpenseCategory[];
@@ -6,5 +6,5 @@ export type CategoryWithChildren = ExpenseCategory & {
 };
 
 export type CategoryWithExpenses = ExpenseCategory & {
-  Expense: any[];
+  Expense: Expense[];
 };

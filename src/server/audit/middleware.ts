@@ -26,7 +26,7 @@ const IGNORED_ACTIONS = new Set<string>([
   "groupBy",
 ]);
 
-function mapAction(model: string, op: Prisma.PrismaAction, before?: any, after?: any): string {
+function mapAction(_model: string, op: Prisma.PrismaAction, before?: Record<string, unknown>, after?: Record<string, unknown>): string {
   if (op === "create") return "CREATED";
   if (op === "delete") return "DELETED";
   if (op === "update") {
@@ -40,9 +40,9 @@ function mapAction(model: string, op: Prisma.PrismaAction, before?: any, after?:
   return op.toUpperCase();
 }
 
-function sanitize(obj: any) {
+function sanitize(obj: unknown): unknown {
   if (!obj || typeof obj !== "object") return obj;
-  const out: any = Array.isArray(obj) ? [] : {};
+  const out: Record<string, unknown> = Array.isArray(obj) ? [] : {};
   for (const k of Object.keys(obj)) {
     if (HIDDEN_FIELDS.has(k)) out[k] = "[REDACTED]";
     else if (obj[k] && typeof obj[k] === "object") out[k] = sanitize(obj[k]);
@@ -51,13 +51,13 @@ function sanitize(obj: any) {
   return out;
 }
 
-function makeDiff(before?: any, after?: any) {
+function makeDiff(before?: Record<string, unknown>, after?: Record<string, unknown>) {
   if (!before && after) return { after: sanitize(after) };
   if (before && !after) return { before: sanitize(before) };
 
   const b = sanitize(before ?? {});
   const a = sanitize(after ?? {});
-  const changed: Record<string, { before: any; after: any }> = {};
+  const changed: Record<string, { before: unknown; after: unknown }> = {};
   const keys = new Set([...Object.keys(b), ...Object.keys(a)]);
   for (const k of keys) {
     const bv = b[k];
@@ -69,7 +69,7 @@ function makeDiff(before?: any, after?: any) {
   return Object.keys(changed).length ? changed : undefined;
 }
 
-function getId(obj: any): string | undefined {
+function getId(obj: Record<string, unknown>): string | undefined {
   if (!obj) return undefined;
   if (obj.id != null) return String(obj.id);
   return undefined;
@@ -85,7 +85,7 @@ export function auditMiddleware(prisma: PrismaClient): Prisma.Middleware {
     const ctx = getActorContext();
     const op = action as Prisma.PrismaAction;
 
-    let before: any | undefined;
+    let before: Record<string, unknown> | undefined;
     if (op === "update" || op === "delete" || op === "upsert") {
       try {
         // biome-ignore lint/suspicious/noExplicitAny: acesso dinâmico ao model
@@ -97,7 +97,7 @@ export function auditMiddleware(prisma: PrismaClient): Prisma.Middleware {
 
     const result = await next(params);
 
-    let after: any | undefined;
+    let after: Record<string, unknown> | undefined;
     if (op === "create" || op === "update" || op === "upsert") after = result;
     else if (op === "createMany") after = { count: result?.count };
     else if (op === "updateMany" || op === "deleteMany") after = { count: result?.count };
@@ -110,7 +110,7 @@ export function auditMiddleware(prisma: PrismaClient): Prisma.Middleware {
 
     try {
       // isso passa pelo middleware mas é ignorado pq model === "AuditLog"
-      await (prisma as any).auditLog.create({
+      await prisma.auditLog.create({
         data: {
           entity: model,
           entityId,

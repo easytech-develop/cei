@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/prisma";
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.AuditLogWhereInput = {};
 
     if (entity) {
       where.entity = entity;

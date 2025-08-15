@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import type { CreateVendorSchema } from "@/app/(main)/(feature-expenses)/validators/vendors";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ export default function CreateVendor({ trigger }: CreateVendorProps) {
     },
   });
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: CreateVendorSchema) => {
     mutate(data);
   };
 

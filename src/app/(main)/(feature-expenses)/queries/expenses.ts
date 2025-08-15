@@ -29,6 +29,13 @@ import type {
   UpdateExpenseSchema,
 } from "../validators/expenses";
 
+type InstallmentFilters = {
+  vendorId?: string;
+  categoryId?: string;
+  daysOverdue?: number;
+  daysAhead?: number;
+};
+
 // Chaves de cache
 export const expenseKeys = {
   all: ["expenses"] as const,
@@ -39,8 +46,8 @@ export const expenseKeys = {
   detail: (id: string) => [...expenseKeys.details(), id] as const,
   stats: (filters?: ExpenseStatsFilters) =>
     [...expenseKeys.all, "stats", filters] as const,
-  overdue: (filters?: any) => [...expenseKeys.all, "overdue", filters] as const,
-  upcoming: (filters?: any) =>
+  overdue: (filters?: InstallmentFilters) => [...expenseKeys.all, "overdue", filters] as const,
+  upcoming: (filters?: InstallmentFilters) =>
     [...expenseKeys.all, "upcoming", filters] as const,
 };
 
@@ -73,7 +80,7 @@ export function useExpenseStats(filters?: ExpenseStatsFilters) {
 }
 
 // Hook para parcelas vencidas
-export function useOverdueInstallments(filters?: any) {
+export function useOverdueInstallments(filters?: InstallmentFilters) {
   return useQuery({
     queryKey: expenseKeys.overdue(filters),
     queryFn: () => getOverdueInstallments(filters),
@@ -82,7 +89,7 @@ export function useOverdueInstallments(filters?: any) {
 }
 
 // Hook para próximos vencimentos
-export function useUpcomingInstallments(filters?: any) {
+export function useUpcomingInstallments(filters?: InstallmentFilters) {
   return useQuery({
     queryKey: expenseKeys.upcoming(filters),
     queryFn: () => getUpcomingInstallments(filters),
