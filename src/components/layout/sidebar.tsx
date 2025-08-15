@@ -22,6 +22,7 @@ import {
   Sun,
   Upload,
   UserCog,
+  UserStar,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -176,10 +177,10 @@ const sidebarItems: SidebarItem[] = [
     href: "/calendar",
   },
   {
-    id: "send",
-    icon: Send,
-    label: "Enviar",
-    href: "/send",
+    id: "contacts",
+    icon: UserStar,
+    label: "Contatos",
+    href: "/contacts",
   },
   {
     id: "config",
@@ -280,10 +281,12 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                 className="w-10 h-10 rounded-full hover:bg-sidebar-accent transition-all duration-200 bg-sidebar border border-sidebar-border"
                 onClick={() => setIsCollapsed(false)}
               >
-                <ChevronLeft className={cn(
-                  "h-4 w-4 text-sidebar-foreground transition-all duration-200",
-                  isCollapsed && "rotate-180"
-                )} />
+                <ChevronLeft
+                  className={cn(
+                    "h-4 w-4 text-sidebar-foreground transition-all duration-200",
+                    isCollapsed && "rotate-180",
+                  )}
+                />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">Expandir Sidebar</TooltipContent>

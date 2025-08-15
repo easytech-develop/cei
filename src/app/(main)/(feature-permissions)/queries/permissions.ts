@@ -58,8 +58,7 @@ export function useCreatePermission() {
         toast.error(response.message);
       }
     },
-    onError: (error) => {
-      console.error("Erro ao criar permissão:", error);
+    onError: () => {
       toast.error("Erro interno ao criar permissão");
     },
   });
@@ -79,8 +78,7 @@ export function useUpdatePermission() {
         toast.error(response.message);
       }
     },
-    onError: (error) => {
-      console.error("Erro ao atualizar permissão:", error);
+    onError: () => {
       toast.error("Erro interno ao atualizar permissão");
     },
   });
@@ -100,8 +98,7 @@ export function useDeletePermission() {
         toast.error(response.message);
       }
     },
-    onError: (error) => {
-      console.error("Erro ao excluir permissão:", error);
+    onError: () => {
       toast.error("Erro interno ao excluir permissão");
     },
   });
@@ -136,8 +133,7 @@ export function useUpdateRolePermissions() {
         toast.error(response.message);
       }
     },
-    onError: (error) => {
-      console.error("Erro ao atualizar permissões do função:", error);
+    onError: () => {
       toast.error("Erro interno ao atualizar permissões do função");
     },
   });
@@ -172,8 +168,7 @@ export function useUpdateUserPermissions() {
         toast.error(response.message);
       }
     },
-    onError: (error) => {
-      console.error("Erro ao atualizar permissões do usuário:", error);
+    onError: () => {
       toast.error("Erro interno ao atualizar permissões do usuário");
     },
   });
