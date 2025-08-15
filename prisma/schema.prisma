@@ -211,9 +211,10 @@ model Account {
 
   createdBy String?
   updatedBy String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   deletedAt DateTime?
+  Document  Document[]
 
   @@index([name])
   @@index([code])
@@ -306,6 +307,8 @@ model BillingRule {
 model Document {
   id             String            @id @default(uuid(7))
   direction      DocumentDirection
+  account        Account?          @relation(fields: [accountId], references: [id])
+  accountId      String?
   contact        Contact           @relation(fields: [contactId], references: [id])
   contactId      String
   category       Category          @relation(fields: [categoryId], references: [id])

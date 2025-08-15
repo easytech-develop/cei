@@ -20,7 +20,7 @@ export default async function ContactsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Contatos</h1>
           <p className="text-muted-foreground">
-            Gerencie seus contatos, clientes e fornecedores.
+            Gerencie seus contatos (clientes e fornecedores).
           </p>
         </div>
         <CreateContact

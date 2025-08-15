@@ -1,6 +1,6 @@
 "use client";
 
-import type { ContactRole } from "@prisma/client";
+import type { DocumentDirection } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Check, CircleFadingPlus, Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -22,62 +22,48 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { cn, mask } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Meta } from "@/types/generics";
-import { useGetContacts } from "../../../queries/contacts";
-import type { ContactResponse } from "../../../types/contacts";
-import DeleteContact from "./delete-contact";
-import UpdateContact from "./update-contact";
+import { useGetCategories } from "../../../queries/categories";
+import type { CategoryResponse } from "../../../types/categories";
+import DeleteCategory from "./delete-category";
+import UpdateCategory from "./update-category";
 
-const columns: ColumnDef<ContactResponse>[] = [
+const columns: ColumnDef<CategoryResponse>[] = [
   {
     accessorKey: "name",
     header: "Nome",
   },
   {
-    accessorKey: "document",
-    header: "Documento",
+    accessorKey: "direction",
+    header: "Direção",
     cell: ({ row }) => {
-      const document = row.original.document;
-      return document ? mask.cpfOrCnpj(document) : "-";
-    },
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => {
-      const email = row.original.email;
-      return email || "-";
-    },
-  },
-  {
-    accessorKey: "phone",
-    header: "Telefone",
-    cell: ({ row }) => {
-      const phone = row.original.phone;
-      return phone ? mask.phone(phone) : "-";
-    },
-  },
-  {
-    accessorKey: "roles",
-    header: "Função",
-    cell: ({ row }) => {
-      const roles = row.original.roles;
-      const displayRoles = roles.slice(0, 2);
-      const remainingCount = roles.length - 2;
-
+      const direction = row.original.direction;
+      const directionLabels: Record<DocumentDirection, string> = {
+        IN: "Entrada",
+        OUT: "Saída",
+      };
       return (
-        <div className="flex flex-wrap gap-2">
-          {displayRoles.map((role) => (
-            <Badge key={role} variant={role === "CUSTOMER" ? "default" : "secondary"} className="whitespace-nowrap">
-              {role === "CUSTOMER" ? "Cliente" : "Fornecedor"}
-            </Badge>
-          ))}
-          {remainingCount > 0 && (
-            <Badge variant="secondary">+{remainingCount}</Badge>
-          )}
-        </div>
+        <Badge variant={direction === "IN" ? "default" : "secondary"}>
+          {directionLabels[direction]}
+        </Badge>
       );
+    },
+  },
+  {
+    accessorKey: "description",
+    header: "Descrição",
+    cell: ({ row }) => {
+      const description = row.original.description;
+      return description || "-";
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Criado em",
+    cell: ({ row }) => {
+      const date = row.original.createdAt;
+      return new Date(date).toLocaleDateString("pt-BR");
     },
   },
   {
@@ -86,21 +72,21 @@ const columns: ColumnDef<ContactResponse>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex gap-2">
-          <UpdateContact
+          <UpdateCategory
             trigger={
               <Button size="icon" variant="ghost">
                 <Edit />
               </Button>
             }
-            contact={row.original}
+            category={row.original}
           />
-          <DeleteContact
+          <DeleteCategory
             trigger={
               <Button size="icon" variant="ghost">
                 <Trash2 />
               </Button>
             }
-            contact={row.original}
+            category={row.original}
           />
         </div>
       );
@@ -108,52 +94,53 @@ const columns: ColumnDef<ContactResponse>[] = [
   },
 ];
 
-const roleOptions = [
-  { value: "CUSTOMER", label: "Cliente" },
-  { value: "SUPPLIER", label: "Fornecedor" },
+const directionOptions = [
+  { value: "IN", label: "Entrada" },
+  { value: "OUT", label: "Saída" },
 ];
 
-export default function ListContacts() {
+export default function ListCategories() {
   const [filters, setFilters] = useState({
     search: "",
-    roles: [] as ContactRole[],
+    direction: undefined as DocumentDirection | undefined,
   });
   const [meta, setMeta] = useState<Meta>({
     page: 1,
     limit: 10,
   });
-  const { data, isLoading } = useGetContacts({ meta, filters });
+  const { data, isLoading } = useGetCategories({ meta, filters });
 
-  function handleChangeRole(role?: string) {
-    if (!role) {
-      setFilters({ ...filters, roles: [] });
-    } else if (filters.roles.includes(role as ContactRole)) {
-      setFilters({
-        ...filters,
-        roles: filters.roles.filter((item) => item !== role),
-      });
+  function handleChangeDirection(direction?: string) {
+    if (!direction) {
+      setFilters({ ...filters, direction: undefined });
     } else {
       setFilters({
         ...filters,
-        roles: [...filters.roles, role as ContactRole],
+        direction: direction as DocumentDirection,
       });
     }
   }
 
   useEffect(() => {
-    if (window) {
-      const storageMeta = localStorage.getItem("list-contacts-meta");
-      const storageFilters = localStorage.getItem("list-contacts-filters");
+    const storageMeta = localStorage.getItem("list-categories-meta");
+    const storageFilters = localStorage.getItem("list-categories-filters");
 
-      if (storageMeta) {
-        setMeta(JSON.parse(storageMeta));
-      }
+    if (storageMeta) {
+      setMeta(JSON.parse(storageMeta));
+    }
 
-      if (storageFilters) {
-        setFilters(JSON.parse(storageFilters));
-      }
+    if (storageFilters) {
+      setFilters(JSON.parse(storageFilters));
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("list-categories-meta", JSON.stringify(meta));
+  }, [meta]);
+
+  useEffect(() => {
+    localStorage.setItem("list-categories-filters", JSON.stringify(filters));
+  }, [filters]);
 
   return (
     <div className="space-y-4">
@@ -168,35 +155,34 @@ export default function ListContacts() {
           <PopoverTrigger asChild>
             <Button variant="outline" className="border-dashed">
               <CircleFadingPlus className="h-4 w-4 shrink-0" />
-              Função
-              {filters.roles.length > 0 && (
+              Direção
+              {filters.direction && (
                 <Separator orientation="vertical" className="h-4 mx-1" />
               )}
-              {filters.roles.length > 0 && (
+              {filters.direction && (
                 <div className="inline-flex items-center border py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-sm px-1 font-normal">
-                  {filters.roles.length} selecionado
-                  {filters.roles.length > 1 && "s"}
+                  {directionOptions.find(d => d.value === filters.direction)?.label}
                 </div>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[300px] p-0" align="start">
+          <PopoverContent className="w-[200px] p-0" align="start">
             <Command>
-              <CommandInput placeholder="Buscar função..." />
+              <CommandInput placeholder="Buscar direção..." />
               <CommandList>
                 <CommandGroup>
-                  {roleOptions.map((role) => (
+                  {directionOptions.map((direction) => (
                     <CommandItem
-                      key={role.value}
+                      key={direction.value}
                       onSelect={() => {
-                        handleChangeRole(role.value);
+                        handleChangeDirection(direction.value);
                       }}
                     >
-                      {role.label}
+                      {direction.label}
                       <Check
                         className={cn(
                           "h-4 w-4",
-                          filters.roles.includes(role.value as ContactRole)
+                          filters.direction === direction.value
                             ? "opacity-100"
                             : "opacity-0",
                         )}
@@ -209,7 +195,7 @@ export default function ListContacts() {
               <CommandGroup>
                 <CommandItem
                   className="flex justify-center"
-                  onSelect={() => handleChangeRole()}
+                  onSelect={() => handleChangeDirection()}
                 >
                   Limpar filtro
                 </CommandItem>
@@ -220,12 +206,12 @@ export default function ListContacts() {
       </div>
       <DataTable
         columns={columns}
-        data={data?.contacts ?? []}
+        data={data?.data?.categories ?? []}
         loading={isLoading}
         meta={{
           ...meta,
-          total: data?.meta.total ?? 0,
-          totalPages: data?.meta.totalPages ?? 0,
+          total: data?.data?.meta.total ?? 0,
+          totalPages: data?.data?.meta.totalPages ?? 0,
         }}
         setMeta={setMeta}
       />

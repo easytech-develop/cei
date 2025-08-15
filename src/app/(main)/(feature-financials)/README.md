@@ -1,134 +1,188 @@
 # Feature Financeira
 
-Este módulo contém todas as funcionalidades relacionadas ao sistema financeiro da aplicação.
+Este módulo contém todas as funcionalidades relacionadas ao controle financeiro da aplicação.
 
-## Estrutura
+## Funcionalidades
+
+### Contatos
+- CRUD completo de contatos (clientes e fornecedores)
+- Validação de documentos únicos
+- Filtros por nome, documento, email e funções
+- Paginação
+
+### Contas Bancárias
+- CRUD completo de contas bancárias
+- Diferentes tipos de conta (dinheiro, corrente, poupança, investimento)
+- Validação de saldo inicial
+
+### Documentos
+- CRUD completo de documentos financeiros
+- Suporte a documentos a receber (IN) e a pagar (OUT)
+- Filtros avançados por:
+  - Busca textual (número, descrição, contato, categoria)
+  - Direção (a receber/a pagar)
+  - Status (aberto, parcialmente pago, pago, cancelado)
+  - Contato específico
+  - Categoria
+  - Centro de custo
+  - Período de emissão
+  - Período de vencimento
+  - Faixa de valores
+- Paginação com ordenação por vencimento
+- Relacionamentos com contatos, categorias, centros de custo e regras de cobrança
+
+## Estrutura de Arquivos
 
 ```
 (feature-financials)/
 ├── (pages)/
-│   ├── contacts/           # Gestão de contatos (clientes/fornecedores)
-│   └── cash-accounts/      # Gestão de contas bancárias
-├── queries/                # Queries React Query
-├── server/                 # Actions do servidor
-├── types/                  # Tipos TypeScript
-├── validators/             # Schemas de validação Zod
-└── README.md              # Esta documentação
+│   ├── cash-accounts/          # Páginas de contas bancárias
+│   ├── contacts/              # Páginas de contatos
+│   └── wallet/                # Páginas de documentos
+├── queries/                   # Hooks do React Query
+│   ├── cash-accounts.ts
+│   ├── contacts.ts
+│   └── documents.ts
+├── server/                    # Server Actions
+│   ├── cash-accounts.ts
+│   ├── contacts.ts
+│   └── documents.ts
+├── types/                     # Tipos TypeScript
+│   ├── cash-accounts.ts
+│   ├── contacts.ts
+│   └── documents.ts
+├── validators/                # Schemas de validação Zod
+│   ├── cash-accounts.ts
+│   ├── contacts.ts
+│   └── documents.ts
+└── ui/                        # Componentes específicos da feature
 ```
 
-## Funcionalidades
+## Como Usar
 
-### Contatos (`contacts/`)
+### Documentos
 
-Gerencia contatos, clientes e fornecedores do sistema.
+#### Server Actions
 
-**Componentes:**
-- `ListContacts` - Lista todos os contatos com filtros e paginação
-- `CreateContact` - Modal para criar novo contato
-- `UpdateContact` - Modal para editar contato existente
-- `DeleteContact` - Dialog de confirmação para excluir contato
+```typescript
+import { getDocuments, getDocumentById } from "./server/documents";
 
-**Funcionalidades:**
-- CRUD completo de contatos
-- Filtros por nome, documento, email e função
-- Validação de documentos únicos
-- Soft delete (exclusão lógica)
-- Restauração automática de contatos deletados
+// Listar documentos com filtros e paginação
+const result = await getDocuments({
+  meta: { page: 1, limit: 10 },
+  filters: {
+    search: "nota fiscal",
+    direction: ["IN"],
+    status: ["OPEN"],
+    dateFrom: new Date("2024-01-01"),
+    dateTo: new Date("2024-12-31"),
+    amountMin: 100,
+    amountMax: 1000,
+  },
+});
 
-### Contas Bancárias (`cash-accounts/`)
+// Buscar documento por ID
+const document = await getDocumentById("document-id");
+```
 
-Gerencia contas bancárias e financeiras do sistema.
+#### React Query Hooks
 
-**Componentes:**
-- `ListCashAccounts` - Lista todas as contas bancárias com filtros e paginação
-- `CreateCashAccount` - Modal para criar nova conta bancária
-- `UpdateCashAccount` - Modal para editar conta bancária existente
-- `DeleteCashAccount` - Dialog de confirmação para excluir conta bancária
+```typescript
+import { useDocuments, useDocument } from "./queries/documents";
 
-**Funcionalidades:**
-- CRUD completo de contas bancárias
-- Suporte a diferentes tipos de conta (Dinheiro, Conta Corrente, Poupança, Investimento, Outro)
-- Filtros por nome, tipo, agência, número da conta e status
-- Validação de conta contábil relacionada
-- Saldo inicial configurável
-- Status ativo/inativo
-- Soft delete (exclusão lógica)
+function DocumentList() {
+  const { data, isLoading, error } = useDocuments(
+    { page: 1, limit: 10 },
+    { direction: ["IN"], status: ["OPEN"] }
+  );
 
-## Padrões de Desenvolvimento
+  const { data: document } = useDocument("document-id");
 
-### Estrutura de Arquivos
+  // Renderizar dados...
+}
+```
 
-Cada funcionalidade segue a mesma estrutura:
+#### Filtros Disponíveis
 
-1. **Types** (`types/`) - Definições de tipos TypeScript
-2. **Validators** (`validators/`) - Schemas Zod para validação
-3. **Server** (`server/`) - Actions do servidor (Server Actions)
-4. **Queries** (`queries/`) - Hooks React Query para cache e sincronização
-5. **Pages** (`(pages)/`) - Componentes da interface
+- `search`: Busca textual em número, descrição, contato, categoria
+- `direction`: Array de direções ("IN" | "OUT")
+- `status`: Array de status ("OPEN" | "PARTIALLY_PAID" | "PAID" | "CANCELLED")
+- `contactId`: ID do contato específico
+- `categoryId`: ID da categoria específica
+- `costCenterId`: ID do centro de custo específico
+- `dateFrom`/`dateTo`: Período de emissão
+- `dueDateFrom`/`dueDateTo`: Período de vencimento
+- `amountMin`/`amountMax`: Faixa de valores
 
-### Validação
+#### Exemplo de Componente
 
-Todos os formulários usam Zod para validação com schemas específicos:
-- `create*Schema` - Para criação
-- `update*Schema` - Para atualização
-- `*ResponseSchema` - Para respostas da API
+```typescript
+import { useState } from "react";
+import { useDocuments } from "../queries/documents";
 
-### Tratamento de Erros
+export function DocumentList() {
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({});
 
-- Logs centralizados via `logError`
-- Mensagens de erro amigáveis
-- Toast notifications para feedback do usuário
-- Validação tanto no cliente quanto no servidor
+  const { data, isLoading } = useDocuments(
+    { page, limit: 10 },
+    filters
+  );
 
-### Cache e Sincronização
-
-- React Query para cache e sincronização automática
-- Invalidação de cache após operações de escrita
-- Stale time configurado para 5 minutos
-
-### Soft Delete
-
-Todas as entidades implementam soft delete:
-- Campo `deletedAt` para marcar exclusão
-- Filtros automáticos para excluir registros deletados
-- Possibilidade de restauração
-
-## Uso
-
-### Exemplo de uso dos componentes:
-
-```tsx
-import { CreateCashAccount, ListCashAccounts } from "./_components";
-
-export default function CashAccountsPage() {
   return (
     <div>
-      <CreateCashAccount trigger={<Button>Criar Conta</Button>} />
-      <ListCashAccounts />
+      {/* Filtros */}
+      <input
+        placeholder="Buscar..."
+        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+      />
+
+      {/* Lista */}
+      {isLoading ? (
+        <div>Carregando...</div>
+      ) : (
+        data?.data?.documents.map(document => (
+          <div key={document.id}>
+            {document.documentNumber} - {document.contact.name}
+          </div>
+        ))
+      )}
+
+      {/* Paginação */}
+      {data?.data?.meta.totalPages > 1 && (
+        <div>
+          Página {page} de {data.data.meta.totalPages}
+        </div>
+      )}
     </div>
   );
 }
 ```
 
-### Exemplo de uso das queries:
+## Validações
 
-```tsx
-import { useGetCashAccounts } from "../queries/cash-accounts";
+Todos os dados são validados usando Zod schemas antes de serem processados:
 
-function MyComponent() {
-  const { data, isLoading } = useGetCashAccounts({
-    meta: { page: 1, limit: 10 },
-    filters: { isActive: true }
-  });
-  
-  // ...
-}
+- Validação de campos obrigatórios
+- Validação de tipos de dados
+- Validação de unicidade de documentos
+- Validação de relacionamentos existentes
+
+## Tratamento de Erros
+
+Todas as actions retornam um objeto padronizado:
+
+```typescript
+type ActionResponse<T> = {
+  success: boolean;
+  message: string;
+  data?: T;
+};
 ```
 
-## Próximos Passos
+## Performance
 
-- [ ] Implementar permissões específicas para cada funcionalidade
-- [ ] Adicionar auditoria de mudanças
-- [ ] Implementar exportação de dados
-- [ ] Adicionar relatórios financeiros
-- [ ] Implementar integração com APIs bancárias
+- Consultas otimizadas com índices no banco de dados
+- Paginação para grandes volumes de dados
+- Cache com React Query (5 minutos de stale time)
+- Consultas em paralelo quando possível

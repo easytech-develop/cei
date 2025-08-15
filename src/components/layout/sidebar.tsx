@@ -3,27 +3,22 @@
 import {
   AlertTriangle,
   BanknoteArrowDown,
-  BarChart3,
   Bell,
   Calendar,
   ChevronLeft,
   Database,
-  FileText,
   HelpCircle,
+  Landmark,
   List,
   Moon,
   Plus,
-  Send,
   Settings,
-  Share2,
   Shield,
-  Smartphone,
-  Star,
   Sun,
-  Upload,
   UserCog,
   UserStar,
   Users,
+  WalletCards,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -59,91 +54,16 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
   {
-    id: "share",
-    icon: Share2,
-    label: "Compartilhar",
-    subItems: [
-      {
-        id: "share-link",
-        icon: Share2,
-        label: "Compartilhar Link",
-        href: "/share/link",
-      },
-      {
-        id: "share-file",
-        icon: Upload,
-        label: "Compartilhar Arquivo",
-        href: "/share/file",
-      },
-      {
-        id: "share-email",
-        icon: Send,
-        label: "Compartilhar por Email",
-        href: "/share/email",
-      },
-    ],
+    id: "cash-accounts",
+    icon: Landmark,
+    label: "Contas",
+    href: "/cash-accounts",
   },
   {
-    id: "upload",
-    icon: Upload,
-    label: "Upload",
-    subItems: [
-      {
-        id: "upload-file",
-        icon: Upload,
-        label: "Upload de Arquivo",
-        href: "/upload/file",
-      },
-      {
-        id: "upload-bulk",
-        icon: Database,
-        label: "Upload em Lote",
-        href: "/upload/bulk",
-      },
-      {
-        id: "upload-sync",
-        icon: Send,
-        label: "Sincronizar",
-        href: "/upload/sync",
-      },
-    ],
-  },
-  {
-    id: "favorites",
-    icon: Star,
-    label: "Favoritos",
-    href: "/favorites",
-  },
-  {
-    id: "add",
-    icon: Plus,
-    label: "Adicionar",
-    subItems: [
-      {
-        id: "add-user",
-        icon: Users,
-        label: "Adicionar Usuário",
-        href: "/add/user",
-      },
-      {
-        id: "add-document",
-        icon: FileText,
-        label: "Adicionar Documento",
-        href: "/add/document",
-      },
-      {
-        id: "add-report",
-        icon: BarChart3,
-        label: "Adicionar Relatório",
-        href: "/add/report",
-      },
-    ],
-  },
-  {
-    id: "mobile",
-    icon: Smartphone,
-    label: "Mobile",
-    href: "/mobile",
+    id: "wallet",
+    icon: WalletCards,
+    label: "Carteira",
+    href: "/wallet",
   },
   {
     id: "expenses",
