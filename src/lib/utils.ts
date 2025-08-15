@@ -49,20 +49,48 @@ export const mask = {
     }
   },
   currency: (value: string) => {
-    const formated = value
-      .replace(/[^0-9]/g, "")
-      .replace(/([0-9])([0-9]{2}$)/, "$1,$2");
+    // Remove todos os caracteres não numéricos
+    const cleaned = value.replace(/[^0-9]/g, "");
 
-    if (formated.split("").length > 6 && formated.split("").length <= 7)
-      return formated.replace(/([0-9]{1})(.)/, "$1.$2");
+    // Se não tem valor, retorna vazio
+    if (!cleaned) return "";
 
-    if (formated.split("").length > 7 && formated.split("").length <= 8)
-      return formated.replace(/([0-9]{2})(.)/, "$1.$2");
+    // Converte para número e formata como moeda brasileira
+    const number = parseInt(cleaned, 10);
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(number / 100);
 
-    if (formated.split("").length === 9)
-      return formated.replace(/([0-9]{3})(.)/, "$1.$2");
-
-    return formated;
+    return formatted;
   },
 };
+
+export function formatCurrency(value: number | string): string {
+  const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(numericValue);
+}
+
+export function parseCurrencyToDecimal(value: string): string {
+  if (!value || value.trim() === '') return '0.00';
+
+  // Remove todos os caracteres não numéricos exceto vírgula e ponto
+  const cleaned = value.replace(/[^\d,.-]/g, '');
+
+  // Se tem vírgula, é formato brasileiro (1.000,00)
+  if (cleaned.includes(',')) {
+    // Remove pontos (separadores de milhares) e substitui vírgula por ponto
+    const withoutDots = cleaned.replace(/\./g, '');
+    const normalized = withoutDots.replace(',', '.');
+    const number = parseFloat(normalized) || 0;
+    return number.toFixed(2);
+  }
+
+  // Se não tem vírgula, é formato americano (1000.00)
+  const number = parseFloat(cleaned) || 0;
+  return number.toFixed(2);
+}
 
