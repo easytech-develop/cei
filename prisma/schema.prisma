@@ -176,8 +176,6 @@ enum JournalSide {
   CREDIT
 }
 
-// ---------- CORE ENTIDADES ----------
-
 model Contact {
   id       String        @id @default(uuid(7))
   name     String
@@ -296,12 +294,13 @@ model BillingRule {
   discountPercent Decimal @default(0.00) @db.Decimal(18, 2) // desconto % até data
   notes           String?
 
+  Document Document[]
+
   createdBy String?
   updatedBy String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  Document  Document[]
 }
 
 model Document {
@@ -437,8 +436,9 @@ model JournalEntry {
   memo         String?
   originTable  String? // "Document" / "Transaction" / ...
   originId     String?
-  createdBy    String?
-  createdAt    DateTime @default(now())
+
+  createdBy String?
+  createdAt DateTime @default(now())
 
   lines JournalLine[]
 
