@@ -3,18 +3,16 @@ import {
   Building2,
   DollarSign,
   PiggyBank,
-  PlusIcon,
   TrendingDown,
   TrendingUp,
   Wallet,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { getCashAccounts } from "../../server/cash-accounts";
-import { CreateDocument, ListDocuments } from "./_components";
+import { ListDocuments } from "./_components";
 
 export const metadata: Metadata = {
   title: "Carteira",
@@ -112,13 +110,6 @@ export default async function WalletPage() {
             Gerencie suas movimentações financeiras.
           </p>
         </div>
-        <CreateDocument
-          trigger={
-            <Button size="icon">
-              <PlusIcon className="h-4 w-4" />
-            </Button>
-          }
-        />
       </div>
       <div className="grid gap-6">
         {/* Cash Accounts */}

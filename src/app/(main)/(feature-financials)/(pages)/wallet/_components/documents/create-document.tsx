@@ -19,6 +19,14 @@ import {
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useGetCategories } from "@/app/(main)/(feature-financials)/queries/categories";
+import {
+  useGetCustomers,
+  useGetSuppliers,
+} from "@/app/(main)/(feature-financials)/queries/contacts";
+import { useGetCostCenters } from "@/app/(main)/(feature-financials)/queries/cost-centers";
+import { documentsKeys } from "@/app/(main)/(feature-financials)/queries/documents";
+import { createDocument } from "@/app/(main)/(feature-financials)/server/documents";
 import {
   type CreateDocumentSchema,
   createDocumentSchema,
@@ -66,13 +74,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { queryClient } from "@/lib/queries/query-client";
 import { cn, formatCurrency, mask, parseCurrencyToDecimal } from "@/lib/utils";
-import {
-  useGetCategories,
-} from "../../../queries/categories";
-import { useGetCustomers, useGetSuppliers } from "../../../queries/contacts";
-import { useGetCostCenters } from "../../../queries/cost-centers";
-import { documentsKeys } from "../../../queries/documents";
-import { createDocument } from "../../../server/documents";
 
 type CreateDocumentProps = {
   trigger: React.ReactNode;
@@ -880,8 +881,13 @@ export default function CreateDocument({
                               Valor por Parcela
                             </label>
                             <div className="p-3 bg-white border rounded-md text-lg font-semibold text-green-600">
-                              {Number(parseCurrencyToDecimal(totalAmount)) > 0 && installmentCount > 0
-                                ? formatCurrency(Number(parseCurrencyToDecimal(totalAmount)) / installmentCount)
+                              {Number(parseCurrencyToDecimal(totalAmount)) >
+                                0 && installmentCount > 0
+                                ? formatCurrency(
+                                  Number(
+                                    parseCurrencyToDecimal(totalAmount),
+                                  ) / installmentCount,
+                                )
                                 : "R$ 0,00"}
                             </div>
                           </div>

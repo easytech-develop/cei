@@ -5,6 +5,7 @@ import {
   BanknoteArrowDown,
   BanknoteArrowUp,
   MoreVertical,
+  PlusIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useDocuments } from "../../../queries/documents";
-import type { DocumentFilters } from "../../../types/documents";
+import { useDocuments } from "../../../../queries/documents";
+import type { DocumentFilters } from "../../../../types/documents";
+import { CreateDocument } from "..";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -94,8 +96,15 @@ export default function ListDocuments() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Movimentações</CardTitle>
+          <CreateDocument
+            trigger={
+              <Button size="icon">
+                <PlusIcon className="h-4 w-4" />
+              </Button>
+            }
+          />
         </CardHeader>
         <CardContent>
           {/* Filtros */}
